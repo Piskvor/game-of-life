@@ -1,0 +1,9 @@
+<!ELEMENT life (world,organisms)>
+<!ELEMENT world (cells,species,iterations)>
+<!ELEMENT organisms (organism*)>
+<!ELEMENT organism (x_pos,y_pos,species)>
+<!ELEMENT x_pos (#PCDATA)>
+<!ELEMENT y_pos (#PCDATA)>
+<!ELEMENT species (#PCDATA)>
+<!ELEMENT cells (#PCDATA)>
+<!ELEMENT iterations (#PCDATA)>
