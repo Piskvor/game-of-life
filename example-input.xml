@@ -3,19 +3,55 @@
 <life>
     <world>
 
-        <cells>n</cells><!-- // Dimension of the square "world" -->
+        <cells>10</cells><!-- // Dimension of the square "world" -->
 
-        <species>m</species><!--// Number of distinct species -->
+        <species>3</species><!--// Number of distinct species -->
 
-        <iterations>4000000</iterations><!-- // Number of iterations to be calculated -->
+        <iterations>4</iterations><!-- // Number of iterations to be calculated -->
     </world>
     <organisms>
 
         <organism>
 
-            <x_pos>x</x_pos><!-- // x position -->
+            <x_pos>2</x_pos><!-- // x position -->
 
-            <y_pos>y</y_pos><!-- // y position -->
+            <y_pos>1</y_pos><!-- // y position -->
+
+            <species>t</species><!-- // Species type -->
+
+        </organism>
+        <organism>
+
+            <x_pos>3</x_pos><!-- // x position -->
+
+            <y_pos>2</y_pos><!-- // y position -->
+
+            <species>t</species><!-- // Species type -->
+
+        </organism>
+        <organism>
+
+            <x_pos>1</x_pos><!-- // x position -->
+
+            <y_pos>4</y_pos><!-- // y position -->
+
+            <species>t</species><!-- // Species type -->
+
+        </organism>
+        <organism>
+
+            <x_pos>2</x_pos><!-- // x position -->
+
+            <y_pos>4</y_pos><!-- // y position -->
+
+            <species>t</species><!-- // Species type -->
+
+        </organism>
+        <organism>
+
+            <x_pos>3</x_pos><!-- // x position -->
+
+            <y_pos>4</y_pos><!-- // y position -->
 
             <species>t</species><!-- // Species type -->
 
