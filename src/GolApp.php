@@ -17,7 +17,7 @@ class GolApp
     private $inFile;
 
     /** @var string - path to output file */
-    private $outfile = 'out.xml';
+    private $outfile;
 
     /** @var LifeBoard - the current board generation */
     private $board;
@@ -25,14 +25,16 @@ class GolApp
     /**
      * GolApp constructor.
      * @param string $inFile input XML file
+     * @param string $outFile
      */
-    public function __construct($inFile)
+    public function __construct($inFile, $outFile = 'out.xml')
     {
         if (!(is_file($inFile) || is_link($inFile)) || !is_readable($inFile)) {
             throw new \InvalidArgumentException('Invalid file specified');
         }
         $this->inFile = $inFile;
-        if($this->isDebug) {
+        $this->outfile = $outFile;
+        if ($this->isDebug) {
             echo $this->inFile, "\n";
         }
 
@@ -63,7 +65,7 @@ class GolApp
                 $this->board = $newBoard;
             }
 
-            if ($this->exportFile($this->board)) {
+            if ($this->exportFile($this->board, $this->outfile)) {
                 echo 'Exported to ', $this->outfile, "\n";
             } else {
                 throw new \ErrorException('Unable to export file');
@@ -116,12 +118,13 @@ class GolApp
 
     /**
      * @param LifeBoard $board
+     * @param string $filename
      * @return bool
      */
-    public function exportFile($board): bool
+    public function exportFile($board, $filename = 'out.xml'): bool
     {
         $writer = new \XMLWriter();
-        $writer->openURI($this->outfile);
+        $writer->openURI($filename);
         $writer->startDocument('1.0', 'UTF-8');
         $writer->setIndent(true);
         $writer->startElement('life');
