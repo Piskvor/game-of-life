@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 namespace Piskvor;
 
@@ -52,7 +52,7 @@ class LifeBoard
      * @param int $y
      * @return int
      */
-    public function getOrganism($x, $y)
+    public function getOrganism($x, $y): int
     {
         if (!isset($this->organisms[$x]) || !isset($this->organisms[$x][$y])) {
             return 0;
@@ -61,7 +61,11 @@ class LifeBoard
         }
     }
 
-    public function getAllOrganisms() {
+    /**
+     * Get all the organisms in a flat array
+     * @return array
+     */
+    public function getAllOrganisms(): array {
         $results = array();
         foreach($this->organisms as $x => $cols) {
             foreach ($cols as $y => $species) {
@@ -74,13 +78,15 @@ class LifeBoard
         }
         return $results;
     }
+
     /**
      * Sets a cell with a given type of organism. If conflict, choose one.
      * @param int $x
      * @param int $y
      * @param int $organism
+     * @return int the organism that's set
      */
-    public function setOrganism($x, $y, $organism)
+    public function setOrganism($x, $y, $organism): int
     {
         if (!isset($this->organisms[$x])) {
             $this->organisms[$x] = array();
@@ -90,6 +96,7 @@ class LifeBoard
             $organism = $this->findSurvivor($this->organisms[$x][$y], $organism);
         }
         $this->organisms[$x][$y] = $organism;
+        return $organism;
     }
 
     /**
@@ -120,15 +127,16 @@ class LifeBoard
     /**
      * @return int
      */
-    public function getMaxIterations()
+    public function getMaxIterations(): int
     {
         return $this->maxIterations;
     }
 
     /**
      * @param int $maxIterations
+     * @return LifeBoard
      */
-    public function setMaxIterations($maxIterations)
+    public function setMaxIterations($maxIterations): LifeBoard
     {
         if ($maxIterations <= 0) {
             throw new \InvalidArgumentException('Iterations must be >0');
@@ -136,12 +144,13 @@ class LifeBoard
 
         $this->maxIterations = $maxIterations;
         $this->initializeBoard();
+        return $this;
     }
 
     /**
      * @return bool true if all necessary data has been set
      */
-    public function isInitialized()
+    public function isInitialized(): bool
     {
         return $this->initialized;
     }
@@ -149,7 +158,7 @@ class LifeBoard
     /**
      * @return LifeBoard
      */
-    private function initializeBoard()
+    private function initializeBoard(): LifeBoard
     {
         $alreadyInitialized = $this->isInitialized();
         if (!$alreadyInitialized) {
@@ -170,7 +179,7 @@ class LifeBoard
     /**
      * @return int
      */
-    public function getGeneration()
+    public function getGeneration(): int
     {
         return $this->generation;
     }
@@ -178,7 +187,7 @@ class LifeBoard
     /**
      * @return int
      */
-    public function getEdgeSize()
+    public function getEdgeSize(): int
     {
         return $this->edgeSize;
     }
@@ -187,7 +196,7 @@ class LifeBoard
      * @param int $edgeSize
      * @return LifeBoard
      */
-    public function setEdgeSize($edgeSize)
+    public function setEdgeSize($edgeSize): LifeBoard
     {
         if ($edgeSize <= 0) {
             throw new \InvalidArgumentException('Size must be >0');
@@ -200,7 +209,7 @@ class LifeBoard
     /**
      * @return int
      */
-    public function getSpeciesCount()
+    public function getSpeciesCount(): int
     {
         return $this->speciesCount;
     }
@@ -209,7 +218,7 @@ class LifeBoard
      * @param int $speciesCount
      * @return LifeBoard
      */
-    public function setSpeciesCount($speciesCount)
+    public function setSpeciesCount($speciesCount): LifeBoard
     {
         if ($speciesCount <= 0) {
             throw new \InvalidArgumentException('Species count must be >0');
@@ -225,26 +234,36 @@ class LifeBoard
      * @param int $anotherOrganism
      * @return int the ID of the surviving organism
      */
-    private function findSurvivor($oneOrganism, $anotherOrganism)
+    private function findSurvivor($oneOrganism, $anotherOrganism): int
     {
         // @todo perhaps mt_rand() is overkill, but rand() doesn't quite guarantee a fair coin toss
         return (mt_rand(0, 1) > 0) ? $oneOrganism : $anotherOrganism;
     }
 
-    public function importOrganism($x, $y, $organism)
+    /**
+     * @param int $x
+     * @param int $y
+     * @param int $organism
+     * @return int
+     * @throws BoardStateException
+     */
+    public function importOrganism($x, $y, $organism): int
     {
         if ($this->isInitialized()) {
             if ($x >= $this->getEdgeSize() || $y >= $this->getEdgeSize() || $x < 0 || $y < 0) {
                 throw new \InvalidArgumentException('Cell outside board!');
             }
             $organismNumber = $this->getNumberByOrganismName($organism);
-            $this->setOrganism($x, $y, $organismNumber);
+            return $this->setOrganism($x, $y, $organismNumber);
         } else {
             throw new BoardStateException('Board not configured yet!');
         }
     }
 
-    public function getOrganisms() {
+    /**
+     * @return \int[][]
+     */
+    public function getOrganisms(): array {
         return $this->organisms;
     }
 
@@ -254,7 +273,7 @@ class LifeBoard
      * @return int
      * @throws TooManySpeciesException
      */
-    public function getNumberByOrganismName($organism)
+    public function getNumberByOrganismName($organism): int
     {
         if (!isset($this->organismNameMap[$organism])) {
             $nextCount = count($this->organismNameMap) + 1;
@@ -272,7 +291,7 @@ class LifeBoard
      * @param int $organismNumber
      * @return string
      */
-    public function getOrganismNameByNumber($organismNumber)
+    public function getOrganismNameByNumber($organismNumber): string
     {
         if (is_null($this->organismNumberMap)) {
             $this->organismNumberMap = array_flip($this->organismNameMap);
@@ -287,7 +306,7 @@ class LifeBoard
      * Debug function to return the current state as a string
      * @return string
      */
-    public function getStringMap()
+    public function getStringMap(): string
     {
         $string = ' ';
         for ($x = 0; $x < $this->edgeSize; $x++) {
@@ -347,7 +366,15 @@ class LifeBoard
         }
     }
 
-    public function countLiveNeighbors($x, $y, $species)
+    /**
+     * Calculates live neighbors for the given cell.
+     * @TODO This could be optimized four ways from Friday.
+     * @param int $x
+     * @param int $y
+     * @param int $species
+     * @return int
+     */
+    public function countLiveNeighbors($x, $y, $species): int
     {
         $liveNeighbors = 0;
         for ($xx = -1; $xx <= 1; $xx++) {
@@ -370,7 +397,7 @@ class LifeBoard
      * Get a string representation of the map *state* - regardless of generation count
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getStringMap();
     }
@@ -380,7 +407,7 @@ class LifeBoard
      * @param LifeBoard $lb
      * @return bool
      */
-    public function equals(LifeBoard $lb) {
+    public function equals(LifeBoard $lb): bool {
         return (string)$this === (string)$lb;
     }
 

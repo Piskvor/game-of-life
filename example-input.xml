@@ -7,7 +7,7 @@
 
         <species>3</species><!--// Number of distinct species -->
 
-        <iterations>100</iterations><!-- // Number of iterations to be calculated -->
+        <iterations>10</iterations><!-- // Number of iterations to be calculated -->
     </world>
     <organisms>
 

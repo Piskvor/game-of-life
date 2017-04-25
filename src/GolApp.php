@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Piskvor;
 
@@ -35,6 +36,10 @@ class GolApp
         $this->board = new LifeBoard(); // start with an empty board
     }
 
+    /**
+     * Processes the board and its generations
+     * @throws \ErrorException
+     */
     public function run()
     {
         if ($this->parseFile()) {
@@ -42,10 +47,11 @@ class GolApp
 
                 echo 'Generation: ', $this->board->getGeneration(), "\n";
                 if ($this->isDebug) {
-                    echo($this->board->getStringMap());
+                    echo $this->board;
                 }
                 $this->board = $newBoard;
             }
+
             if ($this->exportFile($this->board)) {
                 echo 'Exported to ', $this->outfile, "\n";
             } else {
@@ -59,7 +65,7 @@ class GolApp
     /**
      * Go through the XML file and import it into the board
      */
-    private function parseFile()
+    private function parseFile(): Parser
     {
 
         $xmlParser = new Parser(); // we have no idea how large the file is, try not to run out of memory
@@ -96,25 +102,25 @@ class GolApp
      * @param LifeBoard $board
      * @return bool
      */
-    private function exportFile($board)
+    private function exportFile($board): bool
     {
         $writer = new \XMLWriter();
         $writer->openURI($this->outfile);
         $writer->startDocument('1.0', 'UTF-8');
-        $writer->setIndent(4);
+        $writer->setIndent(true);
         $writer->startElement('life');
         $writer->startElement('world');
-        $writer->writeElement('cells', $board->getEdgeSize());
-        $writer->writeElement('species', $board->getSpeciesCount());
-        $writer->writeElement('iterations', $board->getMaxIterations());
+        $writer->writeElement('cells', (string)$board->getEdgeSize());
+        $writer->writeElement('species', (string)$board->getSpeciesCount());
+        $writer->writeElement('iterations', (string)$board->getMaxIterations());
         $writer->endElement();
         $writer->startElement('organisms');
         $organisms = $board->getAllOrganisms();
         unset($board);
         foreach ($organisms as $id => $organism) {
             $writer->startElement('organism');
-            $writer->writeElement('x_pos', $organism['x']);
-            $writer->writeElement('y_pos', $organism['y']);
+            $writer->writeElement('x_pos', (string)$organism['x']);
+            $writer->writeElement('y_pos', (string)$organism['y']);
             $writer->writeElement('species', $organism['species']);
             $writer->endElement();
             unset($organisms[$id]);
