@@ -32,6 +32,9 @@ class GolApp
             throw new \InvalidArgumentException('Invalid file specified');
         }
         $this->inFile = $inFile;
+        if($this->isDebug) {
+            echo $this->inFile, "\n";
+        }
 
         $this->board = new LifeBoard(); // start with an empty board
     }
@@ -115,7 +118,7 @@ class GolApp
      * @param LifeBoard $board
      * @return bool
      */
-    private function exportFile($board): bool
+    public function exportFile($board): bool
     {
         $writer = new \XMLWriter();
         $writer->openURI($this->outfile);
