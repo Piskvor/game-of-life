@@ -12,7 +12,9 @@
         "hobnob/xml-stream-reader": "^1.0"
     },
     "require-dev": {
-        "tracy/tracy": "^2.4"
+        "tracy/tracy": "^2.4",
+        "phpunit/phpunit": "^6.1",
+        "phpunit/php-invoker": "^1.1"
     },
     "autoload": {
         "psr-4": {"Piskvor\\": "src/"}
