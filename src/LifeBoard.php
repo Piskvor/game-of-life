@@ -331,8 +331,8 @@ class LifeBoard
     public function getStringMap(): string
     {
         $string = '';
-        for ($x = 0; $x < $this->edgeSize; $x++) {
-            for ($y = 0; $y < $this->edgeSize; $y++) {
+        for ($y = $this->edgeSize - 1; $y >= 0; $y--) {
+            for ($x = $this->edgeSize - 1; $x >= 0; $x--) {
                 $string .= $this->getOrganismNameByNumber($this->getOrganism($x, $y));
             }
             $string .= "\n";
