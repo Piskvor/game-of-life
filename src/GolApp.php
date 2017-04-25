@@ -10,6 +10,8 @@ use Hobnob\XmlStreamReader\Parser;
  */
 class GolApp
 {
+    /** @var bool if true, board is shown for each generation */
+    private $isDebug = false;
     /** @var string - path to input file */
     private $inFile;
 
@@ -37,14 +39,18 @@ class GolApp
     {
         if ($this->parseFile()) {
             while ($newBoard = $this->board->nextGeneration()) {
+
                 echo 'Generation: ', $this->board->getGeneration(), "\n";
-                /*
-                 echo 'Generation: ', $this->board->getGeneration(), "\n";
-                 echo($this->board->getStringMap());
-                // */
+                if ($this->isDebug) {
+                    echo($this->board->getStringMap());
+                }
                 $this->board = $newBoard;
             }
-            $this->exportFile($this->board);
+            if ($this->exportFile($this->board)) {
+                echo 'Exported to ', $this->outfile, "\n";
+            } else {
+                throw new \ErrorException('Unable to export file');
+            }
         } else {
             throw new \ErrorException('Unable to import file');
         }
@@ -88,6 +94,7 @@ class GolApp
 
     /**
      * @param LifeBoard $board
+     * @return bool
      */
     private function exportFile($board)
     {
@@ -114,7 +121,8 @@ class GolApp
         }
         $writer->endElement();
         $writer->endElement();
-        $writer->endDocument();
+        $result = $writer->endDocument();
         $writer->flush();
+        return (bool)$result;
     }
 }
