@@ -254,7 +254,7 @@ class LifeBoard
      * @return int
      * @throws TooManySpeciesException
      */
-    private function getNumberByOrganismName($organism)
+    public function getNumberByOrganismName($organism)
     {
         if (!isset($this->organismNameMap[$organism])) {
             $nextCount = count($this->organismNameMap) + 1;
@@ -334,7 +334,7 @@ class LifeBoard
                         case 2:
                             if ($oldBoard->getOrganism($x, $y) == $species) {
                                 $this->setOrganism($x, $y, $species);
-                            } // else noop
+                            } // else no-op
                             break;
                         case 3:
                             $this->setOrganism($x, $y, $species);
@@ -364,4 +364,24 @@ class LifeBoard
         }
         return $liveNeighbors;
     }
+
+
+    /**
+     * Get a string representation of the map *state* - regardless of generation count
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getStringMap();
+    }
+
+    /**
+     * Inefficient, but workable.
+     * @param LifeBoard $lb
+     * @return bool
+     */
+    public function equals(LifeBoard $lb) {
+        return (string)$this === (string)$lb;
+    }
+
 }
