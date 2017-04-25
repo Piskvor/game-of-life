@@ -234,6 +234,9 @@ class LifeBoard
     public function importOrganism($x, $y, $organism)
     {
         if ($this->isInitialized()) {
+            if ($x >= $this->getEdgeSize() || $y >= $this->getEdgeSize() || $x < 0 || $y < 0) {
+                throw new \InvalidArgumentException('Cell outside board!');
+            }
             $organismNumber = $this->getNumberByOrganismName($organism);
             $this->setOrganism($x, $y, $organismNumber);
         } else {

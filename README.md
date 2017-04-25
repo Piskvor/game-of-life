@@ -20,4 +20,4 @@ Conway's Game Of Life with multiple species
 
 - species do not influence each other (except when conflicted)
 - coordinates are 0-based, increasing (e.g. `n=10` gives a 100-cell grid from [0,0] to [9,9])
-- invalid data (e.g. outside grid) are dropped on import
+- invalid data (e.g. outside grid) are rejected with the whole import (dropping them is another option, I don't think either of these is universally applicable)
