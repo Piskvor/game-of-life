@@ -61,6 +61,19 @@ class LifeBoard
         }
     }
 
+    public function getAllOrganisms() {
+        $results = array();
+        foreach($this->organisms as $x => $cols) {
+            foreach ($cols as $y => $species) {
+                $results[] = array(
+                    'x' => $x,
+                    'y' => $y,
+                    'species' => $this->getOrganismNameByNumber($species)
+                );
+            }
+        }
+        return $results;
+    }
     /**
      * Sets a cell with a given type of organism. If conflict, choose one.
      * @param int $x
@@ -228,6 +241,10 @@ class LifeBoard
         }
     }
 
+    public function getOrganisms() {
+        return $this->organisms;
+    }
+
     /**
      * Map the string name of an organism into an internal representation
      * @param string $organism
@@ -252,7 +269,7 @@ class LifeBoard
      * @param int $organismNumber
      * @return string
      */
-    private function getOrganismNameByNumber($organismNumber)
+    public function getOrganismNameByNumber($organismNumber)
     {
         if (is_null($this->organismNumberMap)) {
             $this->organismNumberMap = array_flip($this->organismNameMap);
@@ -269,7 +286,7 @@ class LifeBoard
      */
     public function getStringMap()
     {
-        $string = '';
+        $string = ' ';
         for ($x = 0; $x < $this->edgeSize; $x++) {
             for ($y = 0; $y < $this->edgeSize; $y++) {
                 $string .= $this->getOrganismNameByNumber($this->getOrganism($x, $y));
@@ -297,6 +314,7 @@ class LifeBoard
 
     /**
      * Actual calculation happens here. We're using the most naive and sloooooow O(c*c*s) method here.
+     * Possible optimizations: check for still life, check for loops, ignore empty areas, ignore already processed cells and only check once per point. Or go for HashLife, currently most efficient.
      * @param LifeBoard $oldBoard
      */
     private function calculateChildren($oldBoard)

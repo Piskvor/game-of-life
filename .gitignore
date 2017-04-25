@@ -2,3 +2,4 @@
 vendor/
 log/
 !log/.gitkeep
+out.xml
