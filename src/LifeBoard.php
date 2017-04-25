@@ -12,13 +12,15 @@ class LifeBoard
 {
     /** @var bool true if all necessary parameters have been passed, false otherwise */
     private $initialized = false;
+
     /** @var int current generation. 0 for the initial import, incremented by 1 for every generation */
     private $generation;
 
     /** @var int number of cells per row and column (i.e. 10 means 10 rows x 10 cols = 100 cells */
     private $edgeSize;
 
-    /** @var int number of species to inhabit the board @todo could be determined dynamically from data? */
+    /** @var int number of species to inhabit the board
+     * @todo could be determined dynamically from data? */
     private $speciesCount;
 
     /** @var int maximum number of iterations to go through */
@@ -32,7 +34,9 @@ class LifeBoard
     /** @var string[] the inverse of $organismNameMap */
     private $organismNumberMap;
 
-    /** @var bool if this becomes true, the pattern is static and won't ever change - do not recompute, just keep bumping generations */
+    /** @var bool if this becomes true, the pattern is static and won't change any more
+     * (e.g. a 2x2 square)
+     * - do not recompute, just keep bumping generations */
     private $stillLife = false;
 
     /**
