@@ -34,6 +34,7 @@ class LifeBoard
 
     public function __construct($organismNameMap = null, $generation = null)
     {
+        $generation = (int)$generation;
         if (is_array($organismNameMap)) {
             $this->organismNameMap = $organismNameMap;
         } else {
