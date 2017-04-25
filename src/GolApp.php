@@ -28,7 +28,7 @@ class GolApp
      */
     public function __construct($inFile)
     {
-        if (!file_exists($inFile)) {
+        if (!(is_file($inFile) || is_link($inFile)) || !is_readable($inFile)) {
             throw new \InvalidArgumentException('Invalid file specified');
         }
         $this->inFile = $inFile;
