@@ -268,11 +268,11 @@ class LifeBoard
     /**
      * @param int $x
      * @param int $y
-     * @param int $organism
+     * @param string $organism
      * @return int
      * @throws BoardStateException
      */
-    public function importOrganism($x, $y, $organism): int
+    public function importOrganism($x, $y, $organism = 'o'): int
     {
         if ($this->isInitialized()) {
             if ($x >= $this->getEdgeSize() || $y >= $this->getEdgeSize() || $x < 0 || $y < 0) {
