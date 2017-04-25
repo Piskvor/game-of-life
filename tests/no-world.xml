@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE life SYSTEM "https://piskvor.github.io/game-of-life/life.dtd">
+<life>
+
+    <organisms>
+
+    </organisms>
+</life>

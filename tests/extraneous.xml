@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE life SYSTEM "https://piskvor.github.io/game-of-life/life.dtd">
+<life>
+    <foo></foo>
+    <world>
+
+        <cells>8</cells><!-- // Dimension of the square "world" -->
+        <bar></bar>
+        <species>4</species><!--// Number of distinct species -->
+
+        <iterations quux="1">10</iterations><!-- // Number of iterations to be calculated -->
+    </world>
+    <organisms>
+        <baz></baz>
+    </organisms>
+</life>
