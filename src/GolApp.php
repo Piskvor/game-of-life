@@ -12,7 +12,7 @@ use Hobnob\XmlStreamReader\Parser;
 class GolApp
 {
     /** @var bool if true, board is shown for each generation */
-    private $isDebug = false;
+    private $isDebug = true;
     /** @var string - path to input file */
     private $inFile;
 
@@ -34,6 +34,14 @@ class GolApp
         $this->inFile = $inFile;
 
         $this->board = new LifeBoard(); // start with an empty board
+    }
+
+    /**
+     * @return LifeBoard
+     */
+    public function getBoard(): LifeBoard
+    {
+        return $this->board;
     }
 
     /**
@@ -65,7 +73,7 @@ class GolApp
     /**
      * Go through the XML file and import it into the board
      */
-    private function parseFile(): Parser
+    public function parseFile(): Parser
     {
 
         $xmlParser = new Parser(); // we have no idea how large the file is, try not to run out of memory
@@ -94,7 +102,12 @@ class GolApp
             }
         );
 
-        return $xmlParser->parse(fopen($this->inFile, 'r'));
+        $parser = $xmlParser->parse(fopen($this->inFile, 'r'));
+
+        if ($this->isDebug) {
+            echo $this->board;
+        }
+        return $parser;
 
     }
 
