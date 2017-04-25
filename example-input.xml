@@ -7,9 +7,46 @@
 
         <species>3</species><!--// Number of distinct species -->
 
-        <iterations>40</iterations><!-- // Number of iterations to be calculated -->
+        <iterations>100</iterations><!-- // Number of iterations to be calculated -->
     </world>
     <organisms>
+
+        <organism>
+
+            <x_pos>10</x_pos><!-- // x position -->
+
+            <y_pos>0</y_pos><!-- // y position -->
+
+            <species>a</species><!-- // Species type -->
+
+        </organism>
+        <organism>
+
+            <x_pos>10</x_pos><!-- // x position -->
+
+            <y_pos>1</y_pos><!-- // y position -->
+
+            <species>a</species><!-- // Species type -->
+
+        </organism>
+       <organism>
+
+            <x_pos>11</x_pos><!-- // x position -->
+
+            <y_pos>1</y_pos><!-- // y position -->
+
+            <species>a</species><!-- // Species type -->
+
+        </organism>
+      <organism>
+
+            <x_pos>11</x_pos><!-- // x position -->
+
+            <y_pos>0</y_pos><!-- // y position -->
+
+            <species>a</species><!-- // Species type -->
+
+        </organism>
 
         <!-- glider start -->
         <organism>

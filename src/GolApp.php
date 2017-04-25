@@ -93,7 +93,7 @@ class GolApp
     {
         $writer = new \XMLWriter();
         $writer->openURI($this->outfile);
-        $writer->startDocument('1.0','UTF-8');
+        $writer->startDocument('1.0', 'UTF-8');
         $writer->setIndent(4);
         $writer->startElement('life');
         $writer->startElement('world');
@@ -106,9 +106,9 @@ class GolApp
         unset($board);
         foreach ($organisms as $id => $organism) {
             $writer->startElement('organism');
-            $writer->writeElement('x_pos',$organism['x']);
-            $writer->writeElement('y_pos',$organism['y']);
-            $writer->writeElement('species',$organism['species']);
+            $writer->writeElement('x_pos', $organism['x']);
+            $writer->writeElement('y_pos', $organism['y']);
+            $writer->writeElement('species', $organism['species']);
             $writer->endElement();
             unset($organisms[$id]);
         }

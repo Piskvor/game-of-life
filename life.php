@@ -4,7 +4,8 @@ require_once 'src/bootstrap.php';
 use Piskvor\GolApp;
 
 if ($argc < 2) {
-    throw new InvalidArgumentException('Input file required');
+    echo "Usage: php life.php filename.xml";
+    die(1);
 }
 $inputFile = realpath($argv[1]);
 $application = new GolApp($inputFile);
