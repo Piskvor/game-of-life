@@ -3,11 +3,11 @@
 <life>
     <world>
 
-        <cells>10</cells><!-- // Dimension of the square "world" -->
+        <cells>20</cells><!-- // Dimension of the square "world" -->
 
         <species>3</species><!--// Number of distinct species -->
 
-        <iterations>4</iterations><!-- // Number of iterations to be calculated -->
+        <iterations>400</iterations><!-- // Number of iterations to be calculated -->
     </world>
     <organisms>
 
@@ -34,7 +34,7 @@
 
             <x_pos>1</x_pos><!-- // x position -->
 
-            <y_pos>4</y_pos><!-- // y position -->
+            <y_pos>3</y_pos><!-- // y position -->
 
             <species>t</species><!-- // Species type -->
 
@@ -43,7 +43,7 @@
 
             <x_pos>2</x_pos><!-- // x position -->
 
-            <y_pos>4</y_pos><!-- // y position -->
+            <y_pos>3</y_pos><!-- // y position -->
 
             <species>t</species><!-- // Species type -->
 
@@ -52,7 +52,7 @@
 
             <x_pos>3</x_pos><!-- // x position -->
 
-            <y_pos>4</y_pos><!-- // y position -->
+            <y_pos>3</y_pos><!-- // y position -->
 
             <species>t</species><!-- // Species type -->
 

@@ -25,20 +25,15 @@ class LifeBoard
     private $maxIterations = 0;
 
     /** @var int[][] a matrix of organisms */
-    private $organisms;
+    private $organisms = array();
 
     /** @var int[] mapping string=>int of organism to internal rep */
     private $organismNameMap;
     /** @var string[] the inverse of $organismNameMap */
     private $organismNumberMap;
 
-    public function __construct($organisms = null, $organismNameMap = null, $generation = null)
+    public function __construct($organismNameMap = null, $generation = null)
     {
-        if (is_array($organisms)) {
-            $this->organisms = $organisms;
-        } else {
-            $this->organisms = array();
-        }
         if (is_array($organismNameMap)) {
             $this->organismNameMap = $organismNameMap;
         } else {
@@ -67,6 +62,7 @@ class LifeBoard
     }
 
     /**
+     * Sets a cell with a given type of organism. If conflict, choose one.
      * @param int $x
      * @param int $y
      * @param int $organism
@@ -83,9 +79,27 @@ class LifeBoard
         $this->organisms[$x][$y] = $organism;
     }
 
+    /**
+     * Clears the cell unconditionally
+     * @param $x
+     * @param $y
+     */
     public function clearOrganism($x, $y)
     {
         if (isset($this->organisms[$x], $this->organisms[$x][$y])) {
+            unset($this->organisms[$x][$y]);
+        }
+    }
+
+    /**
+     * Clears the cell if occupied by this type of organism
+     * @param int $x
+     * @param int $y
+     * @param int $organism
+     */
+    public function clearOrganismType($x, $y, $organism)
+    {
+        if (isset($this->organisms[$x], $this->organisms[$x][$y]) && $this->organisms[$x][$y] == $organism) {
             unset($this->organisms[$x][$y]);
         }
     }
@@ -244,7 +258,7 @@ class LifeBoard
             $this->organismNumberMap = array_flip($this->organismNameMap);
         }
         if (!isset($this->organismNumberMap[$organismNumber])) {
-            return ' ';
+            return '.';
         }
         return $this->organismNumberMap[$organismNumber];
     }
@@ -260,9 +274,9 @@ class LifeBoard
             for ($y = 0; $y < $this->edgeSize; $y++) {
                 $string .= $this->getOrganismNameByNumber($this->getOrganism($x, $y));
             }
-            $string .= "\n";
+            $string .= "\n ";
         }
-        return $string;
+        return trim($string);
     }
 
     /**
@@ -273,10 +287,60 @@ class LifeBoard
         if ($this->getMaxIterations() <= $this->generation) {
             return null;
         }
-        $newBoard = new LifeBoard($this->organisms, $this->organismNameMap, $this->generation + 1);
+        $newBoard = new LifeBoard($this->organismNameMap, $this->generation + 1);
         $newBoard->setSpeciesCount($this->getSpeciesCount())
             ->setEdgeSize($this->getEdgeSize())
             ->setMaxIterations($this->getMaxIterations());
+        $newBoard->calculateChildren($this);
         return $newBoard;
+    }
+
+    /**
+     * Actual calculation happens here. We're using the most naive and sloooooow O(c*c*s) method here.
+     * @param LifeBoard $oldBoard
+     */
+    private function calculateChildren($oldBoard)
+    {
+        for ($species = $this->getSpeciesCount(); $species > 0; $species--) {
+            for ($x = $this->edgeSize - 1; $x >= 0; $x--) {
+                for ($y = $this->edgeSize - 1; $y >= 0; $y--) {
+                    $liveNeighbors = $oldBoard->countLiveNeighbors($x, $y, $species);
+                    switch ($liveNeighbors) {
+                        case 0:
+                        case 1:
+                            $this->clearOrganismType($x, $y, $species);
+                            break;
+                        case 2:
+                            if ($oldBoard->getOrganism($x, $y) == $species) {
+                                $this->setOrganism($x, $y, $species);
+                            } // else noop
+                            break;
+                        case 3:
+                            $this->setOrganism($x, $y, $species);
+                            break;
+                        default:
+                            $this->clearOrganismType($x, $y, $species);
+                    }
+                }
+            }
+        }
+    }
+
+    public function countLiveNeighbors($x, $y, $species)
+    {
+        $liveNeighbors = 0;
+        for ($xx = -1; $xx <= 1; $xx++) {
+            for ($yy = -1; $yy <= 1; $yy += 2) {
+                if ($this->getOrganism($x + $xx, $y + $yy) == $species) {
+                    $liveNeighbors++;
+                }
+            }
+        }
+        for ($xx = -1; $xx <= 1; $xx += 2) {
+            if ($this->getOrganism($x + $xx, $y) == $species) {
+                $liveNeighbors++;
+            }
+        }
+        return $liveNeighbors;
     }
 }
