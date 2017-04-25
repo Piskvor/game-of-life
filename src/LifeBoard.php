@@ -337,7 +337,7 @@ class LifeBoard
             }
             $string .= "\n";
         }
-        return trim($string);
+        return $string;
     }
 
     /**
