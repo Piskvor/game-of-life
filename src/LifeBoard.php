@@ -32,6 +32,25 @@ class LifeBoard
     /** @var string[] the inverse of $organismNameMap */
     private $organismNumberMap;
 
+    /** @var bool if this becomes true, the pattern is static and won't ever change - do not recompute, just keep bumping generations */
+    private $stillLife = false;
+
+    /**
+     * @return bool
+     */
+    public function isStillLife(): bool
+    {
+        return $this->stillLife;
+    }
+
+    /**
+     * @param bool $isStillLife
+     */
+    public function setStillLife(bool $isStillLife)
+    {
+        $this->stillLife = $isStillLife;
+    }
+
     public function __construct($organismNameMap = null, $generation = null)
     {
         $generation = (int)$generation;
@@ -66,9 +85,10 @@ class LifeBoard
      * Get all the organisms in a flat array
      * @return array
      */
-    public function getAllOrganisms(): array {
+    public function getAllOrganisms(): array
+    {
         $results = array();
-        foreach($this->organisms as $x => $cols) {
+        foreach ($this->organisms as $x => $cols) {
             foreach ($cols as $y => $species) {
                 $results[] = array(
                     'x' => $x,
@@ -264,7 +284,8 @@ class LifeBoard
     /**
      * @return \int[][]
      */
-    public function getOrganisms(): array {
+    public function getOrganisms(): array
+    {
         return $this->organisms;
     }
 
@@ -327,12 +348,20 @@ class LifeBoard
         if ($this->getMaxIterations() <= $this->generation) {
             return null;
         }
-        $newBoard = new LifeBoard($this->organismNameMap, $this->generation + 1);
-        $newBoard->setSpeciesCount($this->getSpeciesCount())
-            ->setEdgeSize($this->getEdgeSize())
-            ->setMaxIterations($this->getMaxIterations());
-        $newBoard->calculateChildren($this);
-        return $newBoard;
+        if ($this->isStillLife()) { // nothing more to do here
+            $this->generation++;
+            return $this;
+        } else {
+            $newBoard = new LifeBoard($this->organismNameMap, $this->generation + 1);
+            $newBoard->setSpeciesCount($this->getSpeciesCount())
+                ->setEdgeSize($this->getEdgeSize())
+                ->setMaxIterations($this->getMaxIterations());
+            $newBoard->calculateChildren($this);
+            if ($newBoard->equals($this)) {
+                $newBoard->setStillLife(true);
+            }
+            return $newBoard;
+        }
     }
 
     /**
@@ -408,7 +437,8 @@ class LifeBoard
      * @param LifeBoard $lb
      * @return bool
      */
-    public function equals(LifeBoard $lb): bool {
+    public function equals(LifeBoard $lb): bool
+    {
         return (string)$this === (string)$lb;
     }
 
