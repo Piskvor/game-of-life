@@ -82,6 +82,7 @@ class GolApp
     {
 
         $xmlParser = new Parser(); // we have no idea how large the file is, try not to run out of memory
+        $organismCount = 0;
 
         // configuration options
         /** @noinspection PhpUnusedParameterInspection */
@@ -98,17 +99,22 @@ class GolApp
         /** @noinspection PhpUnusedParameterInspection */
         $xmlParser->registerCallback(
             '/life/organisms/organism',
-            function (Parser $parser, \SimpleXMLElement $organismNode) {
+            function (Parser $parser, \SimpleXMLElement $organismNode) use (&$organismCount) {
                 // @fixme: invalid x_pos and y_pos will become 0. Caveat: parsing speed?
                 $x = (int)$organismNode->x_pos;
                 $y = (int)$organismNode->y_pos;
                 $organism = (string)$organismNode->species;
                 $this->board->importOrganism($x, $y, $organism);
+                $organismCount++;
             }
         );
 
         $parser = $xmlParser->parse(fopen($this->inFile, 'r'));
 
+        // do not recalculate empty board
+        if ($organismCount === 0) {
+            $this->board->setStillLife(true);
+        }
         if ($this->isDebug) {
             echo $this->board;
         }
