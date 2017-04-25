@@ -1,5 +1,5 @@
 <?php
-require_once 'src/bootstrap.php';
+require_once __DIR__ . '/src/bootstrap.php';
 
 use Piskvor\GolApp;
 
