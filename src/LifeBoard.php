@@ -303,7 +303,7 @@ class LifeBoard
     {
         if (!isset($this->organismNameMap[$organism])) {
             $nextCount = count($this->organismNameMap) + 1;
-            if ($nextCount < $this->speciesCount) {
+            if ($nextCount <= $this->speciesCount) {
                 $this->organismNameMap[$organism] = $nextCount;
             } else {
                 throw new TooManySpeciesException('Attempted to add too many species');
