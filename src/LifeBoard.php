@@ -185,9 +185,7 @@ class LifeBoard
      */
     private function initializeBoard(): LifeBoard
     {
-        $alreadyInitialized = $this->isInitialized();
-        if (!$alreadyInitialized) {
-            $this->initialized = ($this->maxIterations > 0) && ($this->edgeSize > 0) && ($this->speciesCount > 0);
+        $this->initialized = ($this->maxIterations > 0) && ($this->edgeSize > 0) && ($this->speciesCount > 0);
             /*
              * @todo perhaps check if this would be faster than creating at access time?
              * @see $this->setOrganism()
@@ -197,7 +195,6 @@ class LifeBoard
                 }
             }
             */
-        }
         return $this;
     }
 
