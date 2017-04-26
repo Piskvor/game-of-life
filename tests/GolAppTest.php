@@ -91,4 +91,15 @@ class GolAppTest extends TestCase
         $this->assertEqualXMLStructure($expected->documentElement, $actual->documentElement);
     }
 
+
+    public function testConflictingCellsImport()
+    {
+        $ga = new GolApp(__DIR__ . '/conflict.xml');
+        $ga->parseFile();
+        $lb = $ga->getBoard();
+        $this->assertTrue($lb->isLive(10, 0));
+        $this->assertCount(1, $lb->getAllOrganisms());
+    }
+
+
 }

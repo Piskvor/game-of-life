@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<life>
+    <world>
+        <cells>20</cells><!-- // Dimension of the square "world" -->
+        <species>2</species><!--// Number of distinct species -->
+        <iterations>300</iterations><!-- // Number of iterations to be calculated -->
+    </world>
+    <organisms>
+        <organism>
+            <x_pos>10</x_pos>
+            <y_pos>0</y_pos>
+            <species>a</species>
+        </organism>
+        <organism>
+            <x_pos>10</x_pos>
+            <y_pos>0</y_pos>
+            <species>b</species>
+        </organism>
+    </organisms>
+</life>

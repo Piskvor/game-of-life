@@ -195,17 +195,18 @@ class LifeBoardTest extends TestCase
             $this->lb->importOrganism(4, $y, 'x');
             $this->lb->importOrganism(6, $y, 'O');
         }
-        $tries = 1000;
+        $tries = 5000;
         $result = 0;
         for ($t = $tries; $t >= 0; $t--) {
             $lbNext = $this->lb->nextGeneration();
-            if ($lbNext->getOrganismNameByNumber($lbNext->getOrganism(5, 5)) === 'x') {
+            $organism = $lbNext->getOrganism(5, 5);
+            $this->assertTrue($organism > 0, 'Organism is dead!');
+            if ($organism % 2 == 0) {
                 $result++;
             }
         }
         $result = $result / $tries;
-        //echo $result;
         // if the selection is random, we should be very close to 0.5 here
-        $this->assertTrue($result > 0.49 && $result < 0.51);
+        $this->assertTrue($result > 0.49 && $result < 0.51, $result);
     }
 }
