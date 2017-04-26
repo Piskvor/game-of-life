@@ -20,7 +20,8 @@ class LifeBoard
     private $edgeSize;
 
     /** @var int number of species to inhabit the board
-     * @todo could be determined dynamically from data? */
+     * @todo could be determined dynamically from data?
+     */
     private $speciesCount;
 
     /** @var int maximum number of iterations to go through */
@@ -83,6 +84,17 @@ class LifeBoard
         } else {
             return $this->organisms[$x][$y];
         }
+    }
+
+    /**
+     * Returns true if the coodinates contain any living cell, false otherwise
+     * @param int $x
+     * @param int $y
+     * @return bool
+     */
+    public function isLive($x, $y): bool
+    {
+        return $this->getOrganism($x, $y) > 0;
     }
 
     /**
@@ -186,15 +198,15 @@ class LifeBoard
     private function initializeBoard(): LifeBoard
     {
         $this->initialized = ($this->maxIterations > 0) && ($this->edgeSize > 0) && ($this->speciesCount > 0);
-            /*
-             * @todo perhaps check if this would be faster than creating at access time?
-             * @see $this->setOrganism()
-            if ($this->initialized) {
-                for ($x = $this->getEdgeSize() - 1; $x >= 0; $x--) {
-                    $this->organisms[$x] = array();
-                }
+        /*
+         * @todo perhaps check if this would be faster than creating at access time?
+         * @see $this->setOrganism()
+        if ($this->initialized) {
+            for ($x = $this->getEdgeSize() - 1; $x >= 0; $x--) {
+                $this->organisms[$x] = array();
             }
-            */
+        }
+        */
         return $this;
     }
 
@@ -338,10 +350,13 @@ class LifeBoard
             }
             $string .= "\n";
         }
-        return $string;
+        return $string . "\n";
     }
 
     /**
+     * Returns a new LB with the state of the next generation.
+     * NOTE that we are NOT changing state of $this, we are making a new instance for the new state.
+     * (Except in the degenerate case of still lives, where we don't compute anything, just bump the gen up)
      * @return LifeBoard|null
      */
     public function nextGeneration()
