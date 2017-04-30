@@ -6,15 +6,22 @@ namespace Piskvor\Test;
 use PHPUnit\Framework\TestCase;
 use Piskvor\BoardStateException;
 use Piskvor\LifeBoard;
+use Piskvor\Log;
 use Piskvor\TooManySpeciesException;
+use Psr\Log\LogLevel;
 
 class LifeBoardTest extends TestCase
 {
+
+    /** @var Log */
+    private $log;
+
     /** @var LifeBoard */
     private $lb;
 
     protected function setUp()
     {
+        $this->log = new Log(LogLevel::DEBUG);
         $this->lb = new LifeBoard();
         $this->lb->setEdgeSize(20)
             ->setMaxIterations(20)
@@ -124,9 +131,9 @@ class LifeBoardTest extends TestCase
             $this->lb->importOrganism(4, $y);
         }
         $this->lb->importOrganism(5, 6);
-        echo $this->lb;
+        $this->log->debug($this->lb);
         $lbNext = $this->lb->nextGeneration();
-        echo $lbNext;
+        $this->log->debug($lbNext);
         $this->assertFalse($lbNext->isLive(5, 5));
     }
 

@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 namespace Piskvor;
 
-
 /**
- * Class LifeBoard represents a board at a given generation. Note that we're internally representing species as ints, and only convert from/to strings on import/export.
+ * Class LifeBoard represents a board at a given generation. Note that we're internally representing species as integers, and only convert from/to strings on import/export.
  * @package Piskvor
  */
 class LifeBoard
