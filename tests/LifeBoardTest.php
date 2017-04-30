@@ -59,7 +59,7 @@ class LifeBoardTest extends TestCase
 
         // import +1 more _over_ an existing one
         $this->lb->importOrganism(5,4);
-        $x++;
+        //$x++; // this MUST NOT bump the count!
 
         // there should now be 10 organisms
         $this->assertCount($x, $this->lb->getAllOrganisms());
