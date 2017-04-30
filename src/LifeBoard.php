@@ -59,9 +59,8 @@ class LifeBoard implements Exportable
         $this->stillLife = $isStillLife;
     }
 
-    public function __construct($organismNameMap = null, $generation = null)
+    public function __construct(array $organismNameMap = null, int $generation = 0)
     {
-        $generation = (int)$generation;
         if (is_array($organismNameMap)) {
             $this->organismNameMap = $organismNameMap;
         } else {
@@ -80,7 +79,7 @@ class LifeBoard implements Exportable
      * @param int $y
      * @return int
      */
-    public function getOrganism($x, $y): int
+    public function getOrganism(int $x, int $y): int
     {
         if (!isset($this->organisms[$x]) || !isset($this->organisms[$x][$y])) {
             return 0;
@@ -95,7 +94,7 @@ class LifeBoard implements Exportable
      * @param int $y
      * @return bool
      */
-    public function isLive($x, $y): bool
+    public function isLive(int $x, int $y): bool
     {
         return $this->getOrganism($x, $y) > 0;
     }
@@ -126,7 +125,7 @@ class LifeBoard implements Exportable
      * @param int $organism
      * @return int the organism that's set
      */
-    public function setOrganism($x, $y, $organism): int
+    public function setOrganism(int $x, int $y, int $organism): int
     {
         if (!isset($this->organisms[$x])) {
             $this->organisms[$x] = array();
@@ -144,7 +143,7 @@ class LifeBoard implements Exportable
      * @param $x
      * @param $y
      */
-    public function clearOrganism($x, $y)
+    public function clearOrganism(int $x, int $y)
     {
         if (isset($this->organisms[$x], $this->organisms[$x][$y])) {
             unset($this->organisms[$x][$y]);
@@ -157,7 +156,7 @@ class LifeBoard implements Exportable
      * @param int $y
      * @param int $organism
      */
-    public function clearOrganismType($x, $y, $organism)
+    public function clearOrganismType(int $x, int $y, int $organism)
     {
         if (isset($this->organisms[$x], $this->organisms[$x][$y]) && $this->organisms[$x][$y] == $organism) {
             unset($this->organisms[$x][$y]);
@@ -176,7 +175,7 @@ class LifeBoard implements Exportable
      * @param int $maxIterations
      * @return LifeBoard
      */
-    public function setMaxIterations($maxIterations): LifeBoard
+    public function setMaxIterations(int $maxIterations): LifeBoard
     {
         if ($maxIterations <= 0) {
             throw new \InvalidArgumentException('Iterations must be >0');
@@ -233,7 +232,7 @@ class LifeBoard implements Exportable
      * @param int $edgeSize
      * @return LifeBoard
      */
-    public function setEdgeSize($edgeSize): LifeBoard
+    public function setEdgeSize(int $edgeSize): LifeBoard
     {
         if ($edgeSize <= 0) {
             throw new \InvalidArgumentException('Size must be >0');
@@ -255,7 +254,7 @@ class LifeBoard implements Exportable
      * @param int $speciesCount
      * @return LifeBoard
      */
-    public function setSpeciesCount($speciesCount): LifeBoard
+    public function setSpeciesCount(int $speciesCount): LifeBoard
     {
         if ($speciesCount <= 0) {
             throw new \InvalidArgumentException('Species count must be >0');
@@ -271,7 +270,7 @@ class LifeBoard implements Exportable
      * @param int $anotherOrganism
      * @return int the ID of the surviving organism
      */
-    private function findSurvivor($oneOrganism, $anotherOrganism): int
+    private function findSurvivor(int $oneOrganism, int $anotherOrganism): int
     {
         // @todo perhaps mt_rand() is overkill, but rand() doesn't quite guarantee a fair coin toss
         return (mt_rand(0, 1) > 0) ? $oneOrganism : $anotherOrganism;
@@ -284,7 +283,7 @@ class LifeBoard implements Exportable
      * @return int
      * @throws BoardStateException
      */
-    public function importOrganism($x, $y, $organism = 'o'): int
+    public function importOrganism(int $x, int $y, string $organism = 'o'): int
     {
         if ($this->isInitialized()) {
             if ($x >= $this->getEdgeSize() || $y >= $this->getEdgeSize() || $x < 0 || $y < 0) {
@@ -311,7 +310,7 @@ class LifeBoard implements Exportable
      * @return int
      * @throws TooManySpeciesException
      */
-    public function getNumberByOrganismName($organism): int
+    public function getNumberByOrganismName(string $organism): int
     {
         if (!isset($this->organismNameMap[$organism])) {
             $nextCount = count($this->organismNameMap) + 1;
@@ -329,7 +328,7 @@ class LifeBoard implements Exportable
      * @param int $organismNumber
      * @return string
      */
-    public function getOrganismNameByNumber($organismNumber): string
+    public function getOrganismNameByNumber(int $organismNumber): string
     {
         if (is_null($this->organismNumberMap)) {
             $this->organismNumberMap = array_flip($this->organismNameMap);
@@ -338,22 +337,6 @@ class LifeBoard implements Exportable
             return '.';
         }
         return $this->organismNumberMap[$organismNumber];
-    }
-
-    /**
-     * Debug function to return the current state as a string
-     * @return string
-     */
-    public function getStringMap(): string
-    {
-        $string = '';
-        for ($y = $this->edgeSize - 1; $y >= 0; $y--) {
-            for ($x = $this->edgeSize - 1; $x >= 0; $x--) {
-                $string .= $this->getOrganismNameByNumber($this->getOrganism($x, $y));
-            }
-            $string .= "\n";
-        }
-        return $string . "\n";
     }
 
     /**
@@ -388,7 +371,7 @@ class LifeBoard implements Exportable
      * Possible optimizations: check for still life, check for loops, ignore empty areas, ignore already processed cells and only check once per point. Or go for HashLife, currently most efficient.
      * @param LifeBoard $oldBoard
      */
-    private function calculateChildren($oldBoard)
+    private function calculateChildren(LifeBoard $oldBoard)
     {
         for ($species = $this->getSpeciesCount(); $species > 0; $species--) {
             for ($x = $this->edgeSize - 1; $x >= 0; $x--) {
@@ -423,7 +406,7 @@ class LifeBoard implements Exportable
      * @param int $species
      * @return int
      */
-    public function countLiveNeighbors($x, $y, $species): int
+    public function countLiveNeighbors(int $x, int $y, int $species): int
     {
         $liveNeighbors = 0;
         for ($xx = -1; $xx <= 1; $xx++) {
@@ -448,11 +431,20 @@ class LifeBoard implements Exportable
      */
     public function __toString(): string
     {
-        return $this->getStringMap();
+        $string = '';
+        for ($y = $this->edgeSize - 1; $y >= 0; $y--) {
+            for ($x = $this->edgeSize - 1; $x >= 0; $x--) {
+                $string .= $this->getOrganismNameByNumber($this->getOrganism($x, $y));
+            }
+            $string .= "\n";
+        }
+        return $string . "\n";
     }
 
     /**
-     * Inefficient, but workable.
+     * Inefficient, but workable: we generate the board as a string representation,
+     * and strings are inherently comparable.
+     * Also, this makes our boards easier to debug visually.
      * @param LifeBoard $lb
      * @return bool
      */
