@@ -2,9 +2,11 @@
 require_once __DIR__ . '/src/bootstrap.php';
 
 use Piskvor\GolApp;
+use Piskvor\Log;
 
+$log = new Log();
 if ($argc < 2) {
-    echo "Usage: php life.php filename.xml";
+    $log->error('Usage: php life.php filename.xml');
     die(1);
 }
 $inputFile = realpath($argv[1]);

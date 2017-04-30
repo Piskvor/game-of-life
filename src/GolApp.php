@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Piskvor;
 
 use Hobnob\XmlStreamReader\Parser;
+use Psr\Log\LogLevel;
 
 /**
  * Class GolApp - basic multi-species Game of Life simulator
@@ -21,6 +22,9 @@ class GolApp
     /** @var LifeBoard - the current board generation */
     private $board;
 
+    /** @var Log */
+    private $log;
+
     /**
      * GolApp constructor.
      * @param string $inFile input XML file
@@ -28,15 +32,16 @@ class GolApp
      */
     public function __construct($inFile, $outFile = 'out.xml')
     {
+        $this->log = new Log();
         if (!(is_file($inFile) || is_link($inFile)) || !is_readable($inFile)) {
             throw new \InvalidArgumentException('Invalid file specified: ' . $inFile);
         }
         $this->inFile = $inFile;
         $this->outFile = $outFile;
         if ($this->isDebug) {
-            echo $this->inFile, "\n";
+            $this->log->setLevel(LogLevel::DEBUG);
+            $this->log->debug($this->inFile, "\n");
         }
-
         $this->board = new LifeBoard(); // start with an empty board
     }
 
@@ -57,15 +62,15 @@ class GolApp
         if ($this->parseFile()) {
             while ($newBoard = $this->board->nextGeneration()) {
 
-                echo 'Generation: ', $this->board->getGeneration(), "\n";
-                if ($this->isDebug) {
-                    echo $this->board;
+                $this->log->info('Generation: ' . $this->board->getGeneration() . "\n");
+                if ($this->isDebug) { // might be expensive
+                    $this->log->debug($this->board);
                 }
                 $this->board = $newBoard;
             }
 
             if ($this->board->export($this->outFile)) {
-                echo 'Exported to ', $this->outFile, "\n";
+                $this->log->info('Exported to ' . $this->outfile . "\n");
             } else {
                 throw new \ErrorException('Unable to export file');
             }
@@ -115,7 +120,7 @@ class GolApp
             $this->board->setStillLife(true);
         }
         if ($this->isDebug) {
-            echo $this->board;
+            $this->log->debug($this->board);
         }
         return $parser;
 
