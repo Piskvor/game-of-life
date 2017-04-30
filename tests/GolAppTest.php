@@ -9,6 +9,9 @@ use Piskvor\LifeBoard;
 
 class GolAppTest extends TestCase
 {
+    /**
+     * Test that we won't import something which is not a file: a directory
+     */
     public function testCannotImportNonFile()
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -16,6 +19,12 @@ class GolAppTest extends TestCase
         new GolApp(__DIR__);
     }
 
+    /**
+     * Test that we won't import a file which is not a well-formed XML file.
+     * Note that we *could* validate against the DTD (@see ../life.dtd )
+     * but we're just happy that we get something that matches the expected structure
+     * and we skip any extraneous tags.
+     */
     public function testImportInvalidXml()
     {
         $ga = new GolApp(__DIR__ . '/invalid-xml.xml');
@@ -24,6 +33,13 @@ class GolAppTest extends TestCase
         $ga->parseFile();
     }
 
+    /**
+     * Test that importing a file without the /life/world preamble fails.
+     * This would fail on generation step also (as not initialized).
+     * Note that we don't care where in the XML file this block is,
+     * only that it exists.
+     * We call it "preamble" by convention only.
+     */
     public function testImportNoWorld()
     {
         $ga = new GolApp(__DIR__ . '/no-world.xml');
@@ -32,6 +48,11 @@ class GolAppTest extends TestCase
         $this->assertFalse($ga->getBoard()->isInitialized());
     }
 
+    /**
+     * Test that we don't get tripped up by extra tags that we don't care about.
+     * @TODO: Perhaps we *should* worry about those, as we might be
+     * getting something that's not intended for our consumption?
+     */
     public function testImportExtraneous()
     {
         $ga = new GolApp(__DIR__ . '/extraneous.xml');
@@ -43,6 +64,12 @@ class GolAppTest extends TestCase
         $this->assertCount(0, $lb->getAllOrganisms());
     }
 
+    /**
+     * Test that importing and immediately exporting gives a result
+     * that is equivalent to the original.
+     * Note that XML element ordering is irrelevant
+     * - we are only interested in board state.
+     */
     public function testImportExport()
     {
         $infile = __DIR__ . '/small-world.xml';
@@ -59,6 +86,14 @@ class GolAppTest extends TestCase
         $this->assertEqualXMLStructure($expected->documentElement, $actual->documentElement);
     }
 
+    /**
+     * Test that creating a board programmatically
+     * is equivalent to importing it from XML.
+     *
+     * This might help us with creating further importers later,
+     * should the need for other file formats arise.
+     * @link http://www.mirekw.com/ca/ca_files_formats.html
+     */
     public function testOutsideSourceExport()
     {
         $compareFile = __DIR__ . '/small-world.xml';
@@ -92,6 +127,11 @@ class GolAppTest extends TestCase
     }
 
 
+    /**
+     * Test that we *do* import multiple organisms,
+     * even though they replace each other in a single cell.
+     * @TODO: perhaps reject the import - is this a sign of insane data?
+     */
     public function testConflictingCellsImport()
     {
         $ga = new GolApp(__DIR__ . '/conflict.xml');
