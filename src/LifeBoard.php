@@ -3,13 +3,16 @@ declare(strict_types=1);
 
 namespace Piskvor;
 
+use Piskvor\Export\Exportable;
+use Piskvor\Export\XmlExporter;
 
 /**
  * Class LifeBoard represents a board at a given generation. Note that we're internally representing species as ints, and only convert from/to strings on import/export.
  * @package Piskvor
  */
-class LifeBoard
+class LifeBoard implements Exportable
 {
+    use XmlExporter;
     /** @var bool true if all necessary parameters have been passed, false otherwise */
     private $initialized = false;
 
