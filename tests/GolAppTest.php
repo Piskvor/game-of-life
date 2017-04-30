@@ -27,7 +27,7 @@ class GolAppTest extends TestCase
      */
     public function testImportInvalidXml()
     {
-        $ga = new GolApp(__DIR__ . '/invalid-xml.xml');
+        $ga = new GolApp(__DIR__ . '/imports/invalid-xml.xml');
         $this->expectException(\Exception::class);
         // do you even XML
         $ga->parseFile();
@@ -42,7 +42,7 @@ class GolAppTest extends TestCase
      */
     public function testImportNoWorld()
     {
-        $ga = new GolApp(__DIR__ . '/no-world.xml');
+        $ga = new GolApp(__DIR__ . '/imports/no-world.xml');
         $ga->parseFile();
         // /life/world is missing from XML
         $this->assertFalse($ga->getBoard()->isInitialized());
@@ -55,7 +55,7 @@ class GolAppTest extends TestCase
      */
     public function testImportExtraneous()
     {
-        $ga = new GolApp(__DIR__ . '/extraneous.xml');
+        $ga = new GolApp(__DIR__ . '/imports/extraneous.xml');
         $ga->parseFile();
         $lb = $ga->getBoard();
         // extra XML elements are ignored, the board is initialized
@@ -72,7 +72,7 @@ class GolAppTest extends TestCase
      */
     public function testImportExport()
     {
-        $infile = __DIR__ . '/small-world.xml';
+        $infile = __DIR__ . '/imports/small-world.xml';
         $outFile = __DIR__ . '/../out.xml';
         $ga = new GolApp($infile, $outFile);
         $ga->parseFile();
@@ -96,7 +96,7 @@ class GolAppTest extends TestCase
      */
     public function testOutsideSourceExport()
     {
-        $compareFile = __DIR__ . '/small-world.xml';
+        $compareFile = __DIR__ . '/imports/small-world.xml';
         $outFile = __DIR__ . '/../out.xml';
         // we are NOT parsing the file, just match its structure in code instead
         $lb = new LifeBoard();
@@ -132,7 +132,7 @@ class GolAppTest extends TestCase
      */
     public function testConflictingCellsImport()
     {
-        $ga = new GolApp(__DIR__ . '/conflict.xml');
+        $ga = new GolApp(__DIR__ . '/imports/conflict.xml');
         $ga->parseFile();
         $lb = $ga->getBoard();
         $this->assertTrue($lb->isLive(10, 0));
