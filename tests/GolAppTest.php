@@ -73,16 +73,16 @@ class GolAppTest extends TestCase
     public function testImportExport()
     {
         $infile = __DIR__ . '/small-world.xml';
-        $outfile = __DIR__ . '/../out.xml';
-        $ga = new GolApp($infile, $outfile);
+        $outFile = __DIR__ . '/../out.xml';
+        $ga = new GolApp($infile, $outFile);
         $ga->parseFile();
-        $ga->exportFile($ga->getBoard());
+        $ga->getBoard()->export($outFile);
 
         // see if imported and exported version matches
         $expected = new \DOMDocument();
         $expected->load($infile);
         $actual = new \DOMDocument();
-        $actual->load($outfile);
+        $actual->load($outFile);
         $this->assertEqualXMLStructure($expected->documentElement, $actual->documentElement);
     }
 
@@ -97,10 +97,8 @@ class GolAppTest extends TestCase
     public function testOutsideSourceExport()
     {
         $compareFile = __DIR__ . '/small-world.xml';
-        $outfile = __DIR__ . '/../out.xml';
-        // we are NOT parsing the file
-        $ga = new GolApp($compareFile, $outfile);
-        // match its structure in code instead
+        $outFile = __DIR__ . '/../out.xml';
+        // we are NOT parsing the file, just match its structure in code instead
         $lb = new LifeBoard();
         $lb->setEdgeSize(20)
             ->setSpeciesCount(3)
@@ -116,13 +114,13 @@ class GolAppTest extends TestCase
             $lb->importOrganism($x, 3, 't');
         }
 
-        $ga->exportFile($lb);
+        $lb->export($outFile);
 
         // see if coded and exported version matches
         $expected = new \DOMDocument();
         $expected->load($compareFile);
         $actual = new \DOMDocument();
-        $actual->load($outfile);
+        $actual->load($outFile);
         $this->assertEqualXMLStructure($expected->documentElement, $actual->documentElement);
     }
 

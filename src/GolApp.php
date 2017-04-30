@@ -15,9 +15,8 @@ class GolApp
     private $isDebug = true;
     /** @var string - path to input file */
     private $inFile;
-
     /** @var string - path to output file */
-    private $outfile;
+    private $outFile;
 
     /** @var LifeBoard - the current board generation */
     private $board;
@@ -30,10 +29,10 @@ class GolApp
     public function __construct($inFile, $outFile = 'out.xml')
     {
         if (!(is_file($inFile) || is_link($inFile)) || !is_readable($inFile)) {
-            throw new \InvalidArgumentException('Invalid file specified');
+            throw new \InvalidArgumentException('Invalid file specified: ' . $inFile);
         }
         $this->inFile = $inFile;
-        $this->outfile = $outFile;
+        $this->outFile = $outFile;
         if ($this->isDebug) {
             echo $this->inFile, "\n";
         }
@@ -65,8 +64,8 @@ class GolApp
                 $this->board = $newBoard;
             }
 
-            if ($this->exportFile($this->board, $this->outfile)) {
-                echo 'Exported to ', $this->outfile, "\n";
+            if ($this->board->export($this->outFile)) {
+                echo 'Exported to ', $this->outFile, "\n";
             } else {
                 throw new \ErrorException('Unable to export file');
             }
@@ -122,38 +121,4 @@ class GolApp
 
     }
 
-    /**
-     * @param LifeBoard $board
-     * @param string $filename
-     * @return bool
-     */
-    public function exportFile($board, $filename = 'out.xml'): bool
-    {
-        $writer = new \XMLWriter();
-        $writer->openURI($filename);
-        $writer->startDocument('1.0', 'UTF-8');
-        $writer->setIndent(true);
-        $writer->startElement('life');
-        $writer->startElement('world');
-        $writer->writeElement('cells', (string)$board->getEdgeSize());
-        $writer->writeElement('species', (string)$board->getSpeciesCount());
-        $writer->writeElement('iterations', (string)$board->getMaxIterations());
-        $writer->endElement();
-        $writer->startElement('organisms');
-        $organisms = $board->getAllOrganisms();
-        unset($board);
-        foreach ($organisms as $id => $organism) {
-            $writer->startElement('organism');
-            $writer->writeElement('x_pos', (string)$organism['x']);
-            $writer->writeElement('y_pos', (string)$organism['y']);
-            $writer->writeElement('species', $organism['species']);
-            $writer->endElement();
-            unset($organisms[$id]);
-        }
-        $writer->endElement();
-        $writer->endElement();
-        $result = $writer->endDocument();
-        $writer->flush();
-        return (bool)$result;
-    }
 }
