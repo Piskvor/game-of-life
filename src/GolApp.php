@@ -41,7 +41,7 @@ class GolApp
         $this->outfile = $outFile;
         if ($this->isDebug) {
             $this->log->setLevel(LogLevel::DEBUG);
-            $this->log->debug($this->inFile, "\n");
+            $this->log->debug($this->inFile . "\n");
         }
         $this->board = new LifeBoard(); // start with an empty board
     }
