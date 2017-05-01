@@ -61,7 +61,7 @@ class GolAppTest extends TestCase
         // extra XML elements are ignored, the board is initialized
         $this->assertTrue($lb->isInitialized());
         // there's nothing on the board
-        $this->assertCount(0, $lb->getAllOrganisms());
+        $this->assertCount(0, $lb->getOrganismList());
     }
 
     /**
@@ -105,13 +105,13 @@ class GolAppTest extends TestCase
         $lb->setMaxGenerations(300);
         foreach ([10, 11] as $x) {
             foreach ([0, 1] as $y) {
-                $lb->importOrganism($x, $y, 'a');
+                $lb->addOrganism($x, $y, 'a');
             }
         }
-        $lb->importOrganism(2, 1, 't');
-        $lb->importOrganism(3, 2, 't');
+        $lb->addOrganism(2, 1, 't');
+        $lb->addOrganism(3, 2, 't');
         foreach ([1, 2, 3] as $x) {
-            $lb->importOrganism($x, 3, 't');
+            $lb->addOrganism($x, 3, 't');
         }
 
         $lb->export($outFile);
@@ -136,7 +136,7 @@ class GolAppTest extends TestCase
         $ga->parseFile();
         $lb = $ga->getBoard();
         $this->assertTrue($lb->isLive(10, 0));
-        $this->assertCount(1, $lb->getAllOrganisms());
+        $this->assertCount(1, $lb->getOrganismList());
     }
 
 

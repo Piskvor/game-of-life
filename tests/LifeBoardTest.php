@@ -40,11 +40,11 @@ class LifeBoardTest extends TestCase
      */
     public function testImportOrganism()
     {
-        $this->lb->importOrganism(0, 0);
-        $this->assertCount(1, $this->lb->getAllOrganisms());
+        $this->lb->addOrganism(0, 0);
+        $this->assertCount(1, $this->lb->getOrganismList());
         for ($x = 1; $x < 10; $x++) {
-            $this->lb->importOrganism($x, 4);
-            $this->assertCount($x + 1, $this->lb->getAllOrganisms());
+            $this->lb->addOrganism($x, 4);
+            $this->assertCount($x + 1, $this->lb->getOrganismList());
         }
     }
 
@@ -56,22 +56,22 @@ class LifeBoardTest extends TestCase
     {
         $x = 0;
         // imported 1
-        $this->lb->importOrganism(0, 0);
+        $this->lb->addOrganism(0, 0);
         $x++;
 
-        $this->assertCount(1, $this->lb->getAllOrganisms());
+        $this->assertCount(1, $this->lb->getOrganismList());
         // import +9 more
         for (; $x < 10; $x++) {
             // $x is both a counter and coordinate here
-            $this->lb->importOrganism($x, 4);
+            $this->lb->addOrganism($x, 4);
         }
 
         // import +1 more _over_ an existing one
-        $this->lb->importOrganism(5,4);
+        $this->lb->addOrganism(5,4);
         //$x++; // this MUST NOT bump the count!
 
         // there should now be 10 organisms
-        $this->assertCount($x, $this->lb->getAllOrganisms());
+        $this->assertCount($x, $this->lb->getOrganismList());
     }
 
     /**
@@ -81,7 +81,7 @@ class LifeBoardTest extends TestCase
     public function testImportInvalidCoordsOutsideBoardNegative()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->lb->importOrganism(-1, 0);
+        $this->lb->addOrganism(-1, 0);
     }
 
     /**
@@ -91,7 +91,7 @@ class LifeBoardTest extends TestCase
     public function testImportInvalidCoordsOutsideBoardPositive()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->lb->importOrganism(5, 30);
+        $this->lb->addOrganism(5, 30);
     }
 
 
@@ -106,11 +106,11 @@ class LifeBoardTest extends TestCase
      */
     public function testImportTooManyTypes()
     {
-        $this->lb->importOrganism(1, 0, 'a');
-        $this->lb->importOrganism(5, 0, 'b');
-        $this->lb->importOrganism(2, 0, 'c');
+        $this->lb->addOrganism(1, 0, 'a');
+        $this->lb->addOrganism(5, 0, 'b');
+        $this->lb->addOrganism(2, 0, 'c');
         $this->expectException(TooManySpeciesException::class);
-        $this->lb->importOrganism(2, 0, 'd');
+        $this->lb->addOrganism(2, 0, 'd');
     }
 
     /**
@@ -167,7 +167,7 @@ class LifeBoardTest extends TestCase
         $lb = new LifeBoard();
         $lb->setMaxGenerations(10);
         $this->expectException(BoardStateException::class);
-        $lb->importOrganism(2, 2, 'x');
+        $lb->addOrganism(2, 2, 'x');
     }
 
     /**
@@ -176,9 +176,9 @@ class LifeBoardTest extends TestCase
     public function testNextGenerationFrom0Neighbors()
     {
         // no neighbors, die
-        $this->lb->importOrganism(5, 5);
+        $this->lb->addOrganism(5, 5);
         $lbNext = $this->lb->getNextBoard();
-        $this->assertCount(0, $lbNext->getAllOrganisms());
+        $this->assertCount(0, $lbNext->getOrganismList());
     }
 
     /**
@@ -186,15 +186,15 @@ class LifeBoardTest extends TestCase
      */
     public function testNextGenerationFrom1Neighbor()
     {
-        $this->lb->importOrganism(5, 5);
-        $this->lb->importOrganism(5, 6);
+        $this->lb->addOrganism(5, 5);
+        $this->lb->addOrganism(5, 6);
         $lbNext2 = $this->lb->getNextBoard();
-        $this->assertCount(0, $lbNext2->getAllOrganisms());
+        $this->assertCount(0, $lbNext2->getOrganismList());
 
         // two neighbors, keep (and oscillate)
-        $this->lb->importOrganism(5, 7);
+        $this->lb->addOrganism(5, 7);
         $lbNext3 = $this->lb->getNextBoard();
-        $this->assertCount(3, $lbNext3->getAllOrganisms());
+        $this->assertCount(3, $lbNext3->getOrganismList());
 
     }
 
@@ -208,10 +208,10 @@ class LifeBoardTest extends TestCase
     {
         for ($y = 5; $y <= 7; $y++) {
 
-            $this->lb->importOrganism(5, $y);
+            $this->lb->addOrganism(5, $y);
         }
         $lbNext3 = $this->lb->getNextBoard();
-        $this->assertCount(3, $lbNext3->getAllOrganisms());
+        $this->assertCount(3, $lbNext3->getOrganismList());
 
     }
 
@@ -226,11 +226,11 @@ class LifeBoardTest extends TestCase
     public function testNextGenerationFrom3Neighbors()
     {
         // three neighbors, make fourth
-        $this->lb->importOrganism(5, 5);
-        $this->lb->importOrganism(5, 6);
-        $this->lb->importOrganism(6, 5);
+        $this->lb->addOrganism(5, 5);
+        $this->lb->addOrganism(5, 6);
+        $this->lb->addOrganism(6, 5);
         $lbNext3 = $this->lb->getNextBoard();
-        $this->assertCount(4, $lbNext3->getAllOrganisms());
+        $this->assertCount(4, $lbNext3->getOrganismList());
     }
 
     /**
@@ -240,11 +240,11 @@ class LifeBoardTest extends TestCase
     function testNextGenerationFrom4Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
-        $this->lb->importOrganism(5, 5);
+        $this->lb->addOrganism(5, 5);
         for ($y = 4; $y <= 6; $y++) {
-            $this->lb->importOrganism(4, $y);
+            $this->lb->addOrganism(4, $y);
         }
-        $this->lb->importOrganism(5, 6);
+        $this->lb->addOrganism(5, 6);
         $this->log->debug($this->lb);
         $lbNext = $this->lb->getNextBoard();
         $this->log->debug($lbNext);
@@ -258,12 +258,12 @@ class LifeBoardTest extends TestCase
     function testNextGenerationFrom5Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
-        $this->lb->importOrganism(5, 5);
+        $this->lb->addOrganism(5, 5);
         for ($y = 4; $y <= 6; $y++) {
-            $this->lb->importOrganism(4, $y);
+            $this->lb->addOrganism(4, $y);
         }
-        $this->lb->importOrganism(5, 6);
-        $this->lb->importOrganism(5, 4);
+        $this->lb->addOrganism(5, 6);
+        $this->lb->addOrganism(5, 4);
         $lbNext = $this->lb->getNextBoard();
         $this->assertFalse($lbNext->isLive(5, 5));
     }
@@ -275,13 +275,13 @@ class LifeBoardTest extends TestCase
     function testNextGenerationFrom6Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
-        $this->lb->importOrganism(5, 5);
+        $this->lb->addOrganism(5, 5);
         for ($y = 4; $y <= 6; $y++) {
-            $this->lb->importOrganism(4, $y);
+            $this->lb->addOrganism(4, $y);
         }
-        $this->lb->importOrganism(5, 6);
-        $this->lb->importOrganism(5, 4);
-        $this->lb->importOrganism(6, 4);
+        $this->lb->addOrganism(5, 6);
+        $this->lb->addOrganism(5, 4);
+        $this->lb->addOrganism(6, 4);
         $lbNext = $this->lb->getNextBoard();
         $this->assertFalse($lbNext->isLive(5, 5));
     }
@@ -293,14 +293,14 @@ class LifeBoardTest extends TestCase
     function testNextGenerationFrom7Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
-        $this->lb->importOrganism(5, 5);
+        $this->lb->addOrganism(5, 5);
         for ($y = 4; $y <= 6; $y++) {
-            $this->lb->importOrganism(4, $y);
+            $this->lb->addOrganism(4, $y);
         }
-        $this->lb->importOrganism(5, 6);
-        $this->lb->importOrganism(5, 4);
-        $this->lb->importOrganism(6, 4);
-        $this->lb->importOrganism(6, 5);
+        $this->lb->addOrganism(5, 6);
+        $this->lb->addOrganism(5, 4);
+        $this->lb->addOrganism(6, 4);
+        $this->lb->addOrganism(6, 5);
         $lbNext = $this->lb->getNextBoard();
         $this->assertFalse($lbNext->isLive(5, 5));
     }
@@ -312,14 +312,14 @@ class LifeBoardTest extends TestCase
     function testNextGenerationFrom8Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
-        $this->lb->importOrganism(5, 5);
+        $this->lb->addOrganism(5, 5);
         for ($y = 4; $y <= 6; $y++) {
-            $this->lb->importOrganism(4, $y);
+            $this->lb->addOrganism(4, $y);
         }
-        $this->lb->importOrganism(5, 6);
-        $this->lb->importOrganism(5, 4);
+        $this->lb->addOrganism(5, 6);
+        $this->lb->addOrganism(5, 4);
         for ($y = 4; $y <= 6; $y++) {
-            $this->lb->importOrganism(6, $y);
+            $this->lb->addOrganism(6, $y);
         }
         $lbNext = $this->lb->getNextBoard();
         $this->assertFalse($lbNext->isLive(5, 5));
@@ -376,8 +376,8 @@ class LifeBoardTest extends TestCase
         $expectedResultHigh = $expectedResult + $epsilon;
         $tries = 5000; // A more precise result can be gotten with more iterations, allowing for a smaller $epsilon.
         for ($y = 4; $y <= 6; $y++) {
-            $this->lb->importOrganism(4, $y, 'x');
-            $this->lb->importOrganism(6, $y, 'O');
+            $this->lb->addOrganism(4, $y, 'x');
+            $this->lb->addOrganism(6, $y, 'O');
         }
         $result = 0;
         for ($t = $tries; $t >= 0; $t--) {

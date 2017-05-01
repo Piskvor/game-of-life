@@ -18,7 +18,7 @@ trait XmlExporter
         $writer->writeElement('iterations', (string)$this->getMaxGenerations());
         $writer->endElement();
         $writer->startElement('organisms');
-        $organisms = $this->getAllOrganisms();
+        $organisms = $this->getOrganismList();
         unset($board);
         foreach ($organisms as $id => $organism) {
             $writer->startElement('organism');

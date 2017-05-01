@@ -109,7 +109,7 @@ class GolApp
                 $xPos = (int)$organismNode->x_pos;
                 $yPos = (int)$organismNode->y_pos;
                 $speciesName = (string)$organismNode->species;
-                $this->board->importOrganism($xPos, $yPos, $speciesName);
+                $this->board->addOrganism($xPos, $yPos, $speciesName);
                 $organismCount++;
             }
         );
