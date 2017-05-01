@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Piskvor;
 
 use Hobnob\XmlStreamReader\Parser;
+use Piskvor\LivenessCalculator\LifeBoardCalculator;
 use Psr\Log\LogLevel;
 
 /**
@@ -60,8 +61,9 @@ class GolApp
     public function run()
     {
         if ($this->parseFile()) {
+            $calculator = new LifeBoardCalculator();
             while (!$this->board->isFinished()) {
-                $newBoard = $this->board->getNextBoard();
+                $newBoard = $calculator->getNextBoard($this->board);
                 $this->log->info('Generation: ' . $this->board->getGeneration() . "\n");
                 if ($this->isDebug) { // might be expensive
                     $this->log->debug((string)$this->board);
