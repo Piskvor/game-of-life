@@ -30,7 +30,6 @@ use Piskvor\Export\XmlExporter;
 class LifeBoard implements LifeBoardPublishable, Exportable
 {
     use XmlExporter;
-    use LifeBoardCalculator;
 
     // initial world settings
     /** @var int number of cells per row and column (i.e. 10 means 10 rows x 10 cols = 100 cells; note that the indexes are 0-based */
@@ -195,6 +194,16 @@ class LifeBoard implements LifeBoardPublishable, Exportable
         return $this->getOrganism($xPos, $yPos) > 0;
     }
 
+    public function setFinished(bool $finished)
+    {
+        $this->finished = $finished;
+    }
+
+    public function incrementGeneration()
+    {
+        $this->generation++;
+    }
+
 
     /**
      * Sets a cell with a given species. If conflict, choose one.
@@ -203,7 +212,7 @@ class LifeBoard implements LifeBoardPublishable, Exportable
      * @param int $speciesId
      * @return int the ID of the species that's set (not necessarily what's passed in!)
      */
-    private function setOrganism(int $xPos, int $yPos, int $speciesId): int
+    public function setOrganism(int $xPos, int $yPos, int $speciesId): int
     {
         if (!isset($this->organisms[$xPos])) {
             // nothing in this x_pos yet, set up
@@ -216,6 +225,26 @@ class LifeBoard implements LifeBoardPublishable, Exportable
         }
         $this->organisms[$xPos][$yPos] = $speciesId;
         return $speciesId;
+    }
+
+    /**
+     * Used for passing species name map to new board
+     * @return array|\int[]
+     */
+    public function getSpeciesNameMap()
+    {
+        return $this->speciesNameMap;
+    }
+
+    /**
+     * @param int $originalOrganism
+     * @param int $newOrganism
+     * @return int the ID of the surviving organism
+     */
+    private function findSurvivor(int $originalOrganism, int $newOrganism): int
+    {
+        // @todo perhaps mt_rand() is overkill, but rand() doesn't quite guarantee a fair coin toss
+        return (mt_rand(0, 1) > 0) ? $originalOrganism : $newOrganism;
     }
 
     /**

@@ -8,6 +8,8 @@ use Piskvor\Exception\BoardStateException;
 
 use PHPUnit\Framework\TestCase;
 use Piskvor\LifeBoard;
+use Piskvor\LivenessCalculator\LifeBoardCalculator;
+use Piskvor\LivenessCalculator\LivenessCalculatorInterface;
 use Piskvor\Log;
 use Psr\Log\LogLevel;
 
@@ -21,6 +23,9 @@ class LifeBoardTest extends TestCase
     /** @var LifeBoard */
     private $lb;
 
+    /** @var LivenessCalculatorInterface */
+    private $livenessCalculator;
+
     /**
      * Set up a board that's common to most of the tests.
      * Most of the tests are agnostic to the board's parameters,
@@ -29,6 +34,7 @@ class LifeBoardTest extends TestCase
     protected function setUp()
     {
         $this->log = new Log(LogLevel::DEBUG);
+        $this->livenessCalculator = new LifeBoardCalculator();
         $this->lb = new LifeBoard();
         $this->lb->setEdgeSize(20);
         $this->lb->setMaxGenerations(20);
@@ -177,7 +183,7 @@ class LifeBoardTest extends TestCase
     {
         // no neighbors, die
         $this->lb->addOrganism(5, 5);
-        $lbNext = $this->lb->getNextBoard();
+        $lbNext = $this->livenessCalculator->getNextBoard($this->lb);
         $this->assertCount(0, $lbNext->getOrganismList());
     }
 
@@ -188,12 +194,12 @@ class LifeBoardTest extends TestCase
     {
         $this->lb->addOrganism(5, 5);
         $this->lb->addOrganism(5, 6);
-        $lbNext2 = $this->lb->getNextBoard();
+        $lbNext2 = $this->livenessCalculator->getNextBoard($this->lb);
         $this->assertCount(0, $lbNext2->getOrganismList());
 
         // two neighbors, keep (and oscillate)
         $this->lb->addOrganism(5, 7);
-        $lbNext3 = $this->lb->getNextBoard();
+        $lbNext3 = $this->livenessCalculator->getNextBoard($this->lb);
         $this->assertCount(3, $lbNext3->getOrganismList());
 
     }
@@ -210,7 +216,7 @@ class LifeBoardTest extends TestCase
 
             $this->lb->addOrganism(5, $y);
         }
-        $lbNext3 = $this->lb->getNextBoard();
+        $lbNext3 = $this->livenessCalculator->getNextBoard($this->lb);
         $this->assertCount(3, $lbNext3->getOrganismList());
 
     }
@@ -229,15 +235,14 @@ class LifeBoardTest extends TestCase
         $this->lb->addOrganism(5, 5);
         $this->lb->addOrganism(5, 6);
         $this->lb->addOrganism(6, 5);
-        $lbNext3 = $this->lb->getNextBoard();
+        $lbNext3 = $this->livenessCalculator->getNextBoard($this->lb);
         $this->assertCount(4, $lbNext3->getOrganismList());
     }
 
     /**
      * Test for 4 neighbors - the surrounded cell MUST die
      */
-    public
-    function testNextGenerationFrom4Neighbors()
+    public function testNextGenerationFrom4Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->addOrganism(5, 5);
@@ -246,7 +251,7 @@ class LifeBoardTest extends TestCase
         }
         $this->lb->addOrganism(5, 6);
         $this->log->debug($this->lb);
-        $lbNext = $this->lb->getNextBoard();
+        $lbNext = $this->livenessCalculator->getNextBoard($this->lb);
         $this->log->debug($lbNext);
         $this->assertFalse($lbNext->isLive(5, 5));
     }
@@ -254,8 +259,7 @@ class LifeBoardTest extends TestCase
     /**
      * Test for 5 neighbors - the surrounded cell MUST die
      */
-    public
-    function testNextGenerationFrom5Neighbors()
+    public function testNextGenerationFrom5Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->addOrganism(5, 5);
@@ -264,15 +268,14 @@ class LifeBoardTest extends TestCase
         }
         $this->lb->addOrganism(5, 6);
         $this->lb->addOrganism(5, 4);
-        $lbNext = $this->lb->getNextBoard();
+        $lbNext = $this->livenessCalculator->getNextBoard($this->lb);
         $this->assertFalse($lbNext->isLive(5, 5));
     }
 
     /**
      * Test for 6 neighbors - the surrounded cell MUST die
      */
-    public
-    function testNextGenerationFrom6Neighbors()
+    public function testNextGenerationFrom6Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->addOrganism(5, 5);
@@ -282,15 +285,14 @@ class LifeBoardTest extends TestCase
         $this->lb->addOrganism(5, 6);
         $this->lb->addOrganism(5, 4);
         $this->lb->addOrganism(6, 4);
-        $lbNext = $this->lb->getNextBoard();
+        $lbNext = $this->livenessCalculator->getNextBoard($this->lb);
         $this->assertFalse($lbNext->isLive(5, 5));
     }
 
     /**
      * Test for 7 neighbors - the surrounded cell MUST die
      */
-    public
-    function testNextGenerationFrom7Neighbors()
+    public function testNextGenerationFrom7Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->addOrganism(5, 5);
@@ -301,15 +303,14 @@ class LifeBoardTest extends TestCase
         $this->lb->addOrganism(5, 4);
         $this->lb->addOrganism(6, 4);
         $this->lb->addOrganism(6, 5);
-        $lbNext = $this->lb->getNextBoard();
+        $lbNext = $this->livenessCalculator->getNextBoard($this->lb);
         $this->assertFalse($lbNext->isLive(5, 5));
     }
 
     /**
      * Test for 8 neighbors - the surrounded cell MUST die
      */
-    public
-    function testNextGenerationFrom8Neighbors()
+    public function testNextGenerationFrom8Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->addOrganism(5, 5);
@@ -321,15 +322,14 @@ class LifeBoardTest extends TestCase
         for ($y = 4; $y <= 6; $y++) {
             $this->lb->addOrganism(6, $y);
         }
-        $lbNext = $this->lb->getNextBoard();
+        $lbNext = $this->livenessCalculator->getNextBoard($this->lb);
         $this->assertFalse($lbNext->isLive(5, 5));
     }
 
     /**
      * Test that conflicts are resolved randomly
      */
-    public
-    function testConflictingNewCells()
+    public function testConflictingNewCells()
     {
         /*
             Here we check for liveness of [5,5] specifically:
@@ -381,7 +381,7 @@ class LifeBoardTest extends TestCase
         }
         $result = 0;
         for ($t = $tries; $t >= 0; $t--) {
-            $lbNext = $this->lb->getNextBoard();
+            $lbNext = $this->livenessCalculator->getNextBoard($this->lb);
             $organism = $lbNext->getOrganism(5, 5);
             $this->assertTrue($organism > 0, 'Organism is dead!');
             if ($organism % 2 == 0) {
