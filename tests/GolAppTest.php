@@ -20,51 +20,6 @@ class GolAppTest extends TestCase
     }
 
     /**
-     * Test that we won't import a file which is not a well-formed XML file.
-     * Note that we *could* validate against the DTD (@see ../life.dtd )
-     * but we're just happy that we get something that matches the expected structure
-     * and we skip any extraneous tags.
-     */
-    public function testImportInvalidXml()
-    {
-        $ga = new GolApp(__DIR__ . '/imports/invalid-xml.xml');
-        $this->expectException(\Exception::class);
-        // do you even XML
-        $ga->parseFile();
-    }
-
-    /**
-     * Test that importing a file without the /life/world preamble fails.
-     * This would fail on generation step also (as not initialized).
-     * Note that we don't care where in the XML file this block is,
-     * only that it exists.
-     * We call it "preamble" by convention only.
-     */
-    public function testImportNoWorld()
-    {
-        $ga = new GolApp(__DIR__ . '/imports/no-world.xml');
-        $ga->parseFile();
-        // /life/world is missing from XML
-        $this->assertFalse($ga->getBoard()->isInitialized());
-    }
-
-    /**
-     * Test that we don't get tripped up by extra tags that we don't care about.
-     * @TODO: Perhaps we *should* worry about those, as we might be
-     * getting something that's not intended for our consumption?
-     */
-    public function testImportExtraneous()
-    {
-        $ga = new GolApp(__DIR__ . '/imports/extraneous.xml');
-        $ga->parseFile();
-        $lb = $ga->getBoard();
-        // extra XML elements are ignored, the board is initialized
-        $this->assertTrue($lb->isInitialized());
-        // there's nothing on the board
-        $this->assertCount(0, $lb->getOrganismList());
-    }
-
-    /**
      * Test that importing and immediately exporting gives a result
      * that is equivalent to the original.
      * Note that XML element ordering is irrelevant
@@ -123,21 +78,5 @@ class GolAppTest extends TestCase
         $actual->load($outFile);
         $this->assertEqualXMLStructure($expected->documentElement, $actual->documentElement);
     }
-
-
-    /**
-     * Test that we *do* import multiple organisms,
-     * even though they replace each other in a single cell.
-     * @TODO: perhaps reject the import - is this a sign of insane data?
-     */
-    public function testConflictingCellsImport()
-    {
-        $ga = new GolApp(__DIR__ . '/imports/conflict.xml');
-        $ga->parseFile();
-        $lb = $ga->getBoard();
-        $this->assertTrue($lb->isLive(10, 0));
-        $this->assertCount(1, $lb->getOrganismList());
-    }
-
 
 }
