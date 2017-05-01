@@ -26,7 +26,7 @@ class GolApp
     private $log;
 
     /**
-     * GolApp constructor.
+     * GolApp constructor: set up logging and verify basic sanity.
      * @param string $inFile input XML file
      * @param string $outFile
      */
@@ -64,7 +64,7 @@ class GolApp
                 $newBoard = $this->board->getNextBoard();
                 $this->log->info('Generation: ' . $this->board->getGeneration() . "\n");
                 if ($this->isDebug) { // might be expensive
-                    $this->log->debug($this->board);
+                    $this->log->debug((string)$this->board);
                 }
                 $this->board = $newBoard;
             }
@@ -121,7 +121,7 @@ class GolApp
             $this->board->setStillLife(true);
         }
         if ($this->isDebug) {
-            $this->log->debug($this->board);
+            $this->log->debug((string)$this->board);
         }
         return $parser;
 

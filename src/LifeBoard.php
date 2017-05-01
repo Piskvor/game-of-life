@@ -26,7 +26,7 @@ use Piskvor\Export\XmlExporter;
  *
  * @package Piskvor
  */
-class LifeBoard implements Exportable
+class LifeBoard implements LifeBoardPublishable, Exportable
 {
     use XmlExporter;
 

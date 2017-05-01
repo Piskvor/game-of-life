@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace Piskvor\Export;
 
+/**
+ * Trait XmlExporter: allows for exporting a LifeBoardPublishable-implementing class into XML
+ * @package Piskvor\Export
+ */
 trait XmlExporter
 {
     public function export(string $filename): bool
