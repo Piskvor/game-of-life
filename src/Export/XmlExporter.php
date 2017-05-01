@@ -15,15 +15,15 @@ trait XmlExporter
         $writer->startElement('world');
         $writer->writeElement('cells', (string)$this->getEdgeSize());
         $writer->writeElement('species', (string)$this->getSpeciesCount());
-        $writer->writeElement('iterations', (string)$this->getMaxIterations());
+        $writer->writeElement('iterations', (string)$this->getMaxGenerations());
         $writer->endElement();
         $writer->startElement('organisms');
         $organisms = $this->getAllOrganisms();
         unset($board);
         foreach ($organisms as $id => $organism) {
             $writer->startElement('organism');
-            $writer->writeElement('x_pos', (string)$organism['x']);
-            $writer->writeElement('y_pos', (string)$organism['y']);
+            $writer->writeElement('x_pos', (string)$organism['x_pos']);
+            $writer->writeElement('y_pos', (string)$organism['y_pos']);
             $writer->writeElement('species', $organism['species']);
             $writer->endElement();
             unset($organisms[$id]);

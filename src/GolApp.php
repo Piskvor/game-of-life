@@ -96,7 +96,7 @@ class GolApp
             function (Parser $parser, \SimpleXMLElement $worldNode) {
                 $this->board->setEdgeSize((int)$worldNode->cells);
                 $this->board->setSpeciesCount((int)$worldNode->species);
-                $this->board->setMaxIterations((int)$worldNode->iterations);
+                $this->board->setMaxGenerations((int)$worldNode->iterations);
             }
         );
 

@@ -30,9 +30,9 @@ class LifeBoardTest extends TestCase
     {
         $this->log = new Log(LogLevel::DEBUG);
         $this->lb = new LifeBoard();
-        $this->lb->setEdgeSize(20)
-            ->setMaxIterations(20)
-            ->setSpeciesCount(3);
+        $this->lb->setEdgeSize(20);
+        $this->lb->setMaxGenerations(20);
+        $this->lb->setSpeciesCount(3);
     }
 
     /**
@@ -142,7 +142,7 @@ class LifeBoardTest extends TestCase
     {
         $lb = new LifeBoard();
         $this->expectException(\InvalidArgumentException::class);
-        $lb->setMaxIterations(-10);
+        $lb->setMaxGenerations(-10);
     }
 
     /**
@@ -165,7 +165,7 @@ class LifeBoardTest extends TestCase
     public function testImportOrganismBeforeWorld()
     {
         $lb = new LifeBoard();
-        $lb->setMaxIterations(10);
+        $lb->setMaxGenerations(10);
         $this->expectException(BoardStateException::class);
         $lb->importOrganism(2, 2, 'x');
     }

@@ -100,9 +100,9 @@ class GolAppTest extends TestCase
         $outFile = __DIR__ . '/../out.xml';
         // we are NOT parsing the file, just match its structure in code instead
         $lb = new LifeBoard();
-        $lb->setEdgeSize(20)
-            ->setSpeciesCount(3)
-            ->setMaxIterations(300);
+        $lb->setEdgeSize(20);
+        $lb->setSpeciesCount(3);
+        $lb->setMaxGenerations(300);
         foreach ([10, 11] as $x) {
             foreach ([0, 1] as $y) {
                 $lb->importOrganism($x, $y, 'a');

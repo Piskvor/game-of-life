@@ -31,7 +31,7 @@ class LifeBoard implements Exportable
     private $speciesCount = 0;
 
     /** @var int maximum number of iterations to go through */
-    private $maxIterations = 0;
+    private $maxGenerations = 0;
 
     /** @var int[][] a matrix of organisms currently live at the board */
     private $organisms = array();
@@ -84,12 +84,10 @@ class LifeBoard implements Exportable
 
     /**
      * @param bool $isStillLife - if true, the board is static and there's no point in recalculating it
-     * @return LifeBoard
      */
-    public function setStillLife(bool $isStillLife): LifeBoard
+    public function setStillLife(bool $isStillLife)
     {
         $this->stillLife = $isStillLife;
-        return $this;
     }
 
     /**
@@ -128,8 +126,8 @@ class LifeBoard implements Exportable
         foreach ($this->organisms as $xPos => $cols) {
             foreach ($cols as $yPos => $species) {
                 $results[] = array(
-                    'x' => $xPos,
-                    'y' => $yPos,
+                    'x_pos' => $xPos,
+                    'y_pos' => $yPos,
                     'species' => $this->getSpeciesNameById($species)
                 );
             }
@@ -174,12 +172,12 @@ class LifeBoard implements Exportable
     }
 
     /**
-     * Clears the cell if occupied by this type of organism
+     * Clears the cell if occupied by this species, else noop
      * @param int $xPos
      * @param int $yPos
      * @param int $speciesId
      */
-    public function clearOrganismType(int $xPos, int $yPos, int $speciesId)
+    public function clearOrganismSpecies(int $xPos, int $yPos, int $speciesId)
     {
         if (isset($this->organisms[$xPos], $this->organisms[$xPos][$yPos]) && $this->organisms[$xPos][$yPos] == $speciesId) {
             unset($this->organisms[$xPos][$yPos]);
@@ -187,27 +185,25 @@ class LifeBoard implements Exportable
     }
 
     /**
-     * @return int
+     * @return int number of
      */
-    public function getMaxIterations(): int
+    public function getMaxGenerations(): int
     {
-        return $this->maxIterations;
+        return $this->maxGenerations;
     }
 
     /**
-     * @param int $maxIterations
-     * @return LifeBoard
+     * @param int $maxGenerations
      */
-    public function setMaxIterations(int $maxIterations): LifeBoard
+    public function setMaxGenerations(int $maxGenerations)
     {
-        if ($maxIterations <= 0) {
+        if ($maxGenerations <= 0) {
             throw new \InvalidArgumentException('Iterations must be >0');
         }
 
-        $this->maxIterations = $maxIterations;
+        $this->maxGenerations = $maxGenerations;
         $this->initializeBoard();
-        return $this;
-    }
+     }
 
     /**
      * @return bool true if all necessary data has been set
@@ -218,11 +214,11 @@ class LifeBoard implements Exportable
     }
 
     /**
-     * @return LifeBoard
+     * @return bool true if all necessary data has been set
      */
-    private function initializeBoard(): LifeBoard
+    private function initializeBoard(): bool
     {
-        $this->initialized = ($this->maxIterations > 0) && ($this->edgeSize > 0) && ($this->speciesCount > 0);
+        $this->initialized = ($this->maxGenerations > 0) && ($this->edgeSize > 0) && ($this->speciesCount > 0);
         /*
          * @todo perhaps check if this would be faster than creating at access time?
          * @see $this->setOrganism()
@@ -232,7 +228,7 @@ class LifeBoard implements Exportable
             }
         }
         */
-        return $this;
+        return $this->initialized;
     }
 
     /**
@@ -253,17 +249,15 @@ class LifeBoard implements Exportable
 
     /**
      * @param int $edgeSize
-     * @return LifeBoard
      */
-    public function setEdgeSize(int $edgeSize): LifeBoard
+    public function setEdgeSize(int $edgeSize)
     {
         if ($edgeSize <= 0) {
             throw new \InvalidArgumentException('Size must be >0');
         }
         $this->edgeSize = $edgeSize;
         $this->initializeBoard();
-        return $this;
-    }
+   }
 
     /**
      * @return int
@@ -275,9 +269,8 @@ class LifeBoard implements Exportable
 
     /**
      * @param int $speciesCount
-     * @return LifeBoard
-     */
-    public function setSpeciesCount(int $speciesCount): LifeBoard
+      */
+    public function setSpeciesCount(int $speciesCount)
     {
         if ($speciesCount <= 0) {
             throw new \InvalidArgumentException('Species count must be >0');
@@ -285,8 +278,7 @@ class LifeBoard implements Exportable
 
         $this->speciesCount = $speciesCount;
         $this->initializeBoard();
-        return $this;
-    }
+     }
 
     /**
      * @param int $originalOrganism
@@ -371,20 +363,21 @@ class LifeBoard implements Exportable
      */
     public function getNextBoard(): LifeBoard
     {
-        if ($this->getMaxIterations() <= $this->generation) {
+        if ($this->getMaxGenerations() <= $this->generation) { // done
             $this->finished = true;
             return $this;
         }
         if ($this->isStillLife()) { // nothing more to do here
             $this->generation++;
             return $this;
-        } else {
+        } else { // calculate state of next generation
             $newBoard = new LifeBoard($this->speciesNameMap, $this->generation + 1);
-            $newBoard->setSpeciesCount($this->getSpeciesCount())
-                ->setEdgeSize($this->getEdgeSize())
-                ->setMaxIterations($this->getMaxIterations());
+            $newBoard->setSpeciesCount($this->getSpeciesCount());
+            $newBoard->setEdgeSize($this->getEdgeSize());
+            $newBoard->setMaxGenerations($this->getMaxGenerations());
             $newBoard->calculateNewGeneration($this);
             if ($newBoard->equals($this)) {
+                // no more changes
                 $newBoard->setStillLife(true);
             }
             return $newBoard;
@@ -405,7 +398,7 @@ class LifeBoard implements Exportable
                     switch ($liveNeighbors) {
                         case 0:
                         case 1:
-                            $this->clearOrganismType($x, $y, $species);
+                            $this->clearOrganismSpecies($x, $y, $species);
                             break;
                         case 2:
                             if ($oldBoard->getOrganism($x, $y) == $species) {
@@ -416,7 +409,7 @@ class LifeBoard implements Exportable
                             $this->setOrganism($x, $y, $species);
                             break;
                         default:
-                            $this->clearOrganismType($x, $y, $species);
+                            $this->clearOrganismSpecies($x, $y, $species);
                     }
                 }
             }
