@@ -13,38 +13,67 @@ use Piskvor\Export\XmlExporter;
 class LifeBoard implements Exportable
 {
     use XmlExporter;
-    /** @var bool true if all necessary parameters have been passed, false otherwise */
+
+    /** @var bool true if all necessary parameters have been passed (world size, number of species, number of generations), false otherwise */
     private $initialized = false;
 
     /** @var int current generation. 0 for the initial import, incremented by 1 for every generation */
     private $generation;
 
-    /** @var int number of cells per row and column (i.e. 10 means 10 rows x 10 cols = 100 cells */
+    /** @var int number of cells per row and column (i.e. 10 means 10 rows x 10 cols = 100 cells; note that the indexes are 0-based */
     private $edgeSize;
 
     /** @var int number of species to inhabit the board
      * @todo could be determined dynamically from data?
      */
-    private $speciesCount;
+    private $speciesCount = 0;
 
     /** @var int maximum number of iterations to go through */
     private $maxIterations = 0;
 
-    /** @var int[][] a matrix of organisms */
+    /** @var int[][] a matrix of organisms currently live at the board */
     private $organisms = array();
 
-    /** @var int[] mapping string=>int of organism to internal rep */
-    private $organismNameMap;
-    /** @var string[] the inverse of $organismNameMap */
-    private $organismNumberMap;
+    /** @var int[] mapping string=>int: species "name" (a character?) to internal representation */
+    private $speciesNameMap;
+    /** @var string[] the inverse of $speciesNameMap: given the internal species ID, what is the species "name" */
+    private $speciesNumberMap;
 
-    /** @var bool if this becomes true, the pattern is static and won't change any more
+    /** @var bool a simple optimization: if this becomes true, the pattern is static and won't change any more
      * (e.g. a 2x2 square)
      * - do not recompute, just keep bumping generations */
     private $stillLife = false;
 
     /**
-     * @return bool
+     * @var bool
+     */
+    private $finished = false;
+
+    /**
+     * @return bool returns true if all the generations for the board have been completed; false if there are still generations left
+     */
+    public function isFinished(): bool
+    {
+        return $this->finished;
+    }
+
+    public function __construct(array $speciesNameMap = null, int $generation = 0)
+    {
+        if (is_array($speciesNameMap)) { // do not regenerate
+            $this->speciesNameMap = $speciesNameMap;
+        } else { // just start with empty
+            $this->speciesNameMap = array();
+        }
+        if ($generation > 0) {
+            $this->generation = $generation;
+        } else {
+            $this->generation = 0;
+        }
+    }
+
+
+    /**
+     * @return bool true if we reached a static board
      */
     public function isStillLife(): bool
     {
@@ -52,51 +81,39 @@ class LifeBoard implements Exportable
     }
 
     /**
-     * @param bool $isStillLife
+     * @param bool $isStillLife - if true, the board is static and there's no point in recalculating it
+     * @return LifeBoard
      */
-    public function setStillLife(bool $isStillLife)
+    public function setStillLife(bool $isStillLife): LifeBoard
     {
         $this->stillLife = $isStillLife;
-    }
-
-    public function __construct(array $organismNameMap = null, int $generation = 0)
-    {
-        if (is_array($organismNameMap)) {
-            $this->organismNameMap = $organismNameMap;
-        } else {
-            $this->organismNameMap = array();
-        }
-        if ($generation !== null) {
-            $this->generation = $generation;
-        } else {
-            $this->generation = 0;
-        }
+        return $this;
     }
 
     /**
-     * Return the ID of an organism on the given coords (0 for none)
-     * @param int $x
-     * @param int $y
-     * @return int
+     * Return the ID of a species in the given cell (0 for "dead cell")
+     * @param int $xPos
+     * @param int $yPos
+     * @return int the numerical ID of the species
      */
-    public function getOrganism(int $x, int $y): int
+    public function getOrganism(int $xPos, int $yPos): int
     {
-        if (!isset($this->organisms[$x]) || !isset($this->organisms[$x][$y])) {
+        if (!isset($this->organisms[$xPos]) || !isset($this->organisms[$xPos][$yPos])) {
             return 0;
         } else {
-            return $this->organisms[$x][$y];
+            return $this->organisms[$xPos][$yPos];
         }
     }
 
     /**
-     * Returns true if the coodinates contain any living cell, false otherwise
-     * @param int $x
-     * @param int $y
+     * Returns true if the cell contains any living organism (regardless of species), false otherwise
+     * @param int $xPos
+     * @param int $yPos
      * @return bool
      */
-    public function isLive(int $x, int $y): bool
+    public function isLive(int $xPos, int $yPos): bool
     {
-        return $this->getOrganism($x, $y) > 0;
+        return $this->getOrganism($xPos, $yPos) > 0;
     }
 
     /**
@@ -106,12 +123,12 @@ class LifeBoard implements Exportable
     public function getAllOrganisms(): array
     {
         $results = array();
-        foreach ($this->organisms as $x => $cols) {
-            foreach ($cols as $y => $species) {
+        foreach ($this->organisms as $xPos => $cols) {
+            foreach ($cols as $yPos => $species) {
                 $results[] = array(
-                    'x' => $x,
-                    'y' => $y,
-                    'species' => $this->getOrganismNameByNumber($species)
+                    'x' => $xPos,
+                    'y' => $yPos,
+                    'species' => $this->getSpeciesNameById($species)
                 );
             }
         }
@@ -120,46 +137,50 @@ class LifeBoard implements Exportable
 
     /**
      * Sets a cell with a given type of organism. If conflict, choose one.
-     * @param int $x
-     * @param int $y
-     * @param int $organism
-     * @return int the organism that's set
+     * @param int $xPos
+     * @param int $yPos
+     * @param int $speciesId
+     * @return int the ID of the species that's set (not necessarily what's passed in!)
      */
-    public function setOrganism(int $x, int $y, int $organism): int
+    public function setOrganism(int $xPos, int $yPos, int $speciesId): int
     {
-        if (!isset($this->organisms[$x])) {
-            $this->organisms[$x] = array();
+        if (!isset($this->organisms[$xPos])) {
+            // nothing in any x_pos yet, set up
+            $this->organisms[$xPos] = array();
         }
-        if (isset($this->organisms[$x][$y])) {
-            // already occupied - find who survives
-            $organism = $this->findSurvivor($this->organisms[$x][$y], $organism);
+
+        if (isset($this->organisms[$xPos][$yPos])) {
+            // already occupied - find who survives: the previous
+            $speciesId = $this->findSurvivor($this->organisms[$xPos][$yPos], $speciesId);
         }
-        $this->organisms[$x][$y] = $organism;
-        return $organism;
+        $this->organisms[$xPos][$yPos] = $speciesId;
+        return $speciesId;
     }
 
     /**
      * Clears the cell unconditionally
-     * @param $x
-     * @param $y
+     * @param $xPos
+     * @param $yPos
+     * @return int
      */
-    public function clearOrganism(int $x, int $y)
+    public function clearOrganism(int $xPos, int $yPos)
     {
-        if (isset($this->organisms[$x], $this->organisms[$x][$y])) {
-            unset($this->organisms[$x][$y]);
+        if (isset($this->organisms[$xPos], $this->organisms[$xPos][$yPos])) {
+            unset($this->organisms[$xPos][$yPos]);
         }
+        return 0;
     }
 
     /**
      * Clears the cell if occupied by this type of organism
-     * @param int $x
-     * @param int $y
-     * @param int $organism
+     * @param int $xPos
+     * @param int $yPos
+     * @param int $speciesId
      */
-    public function clearOrganismType(int $x, int $y, int $organism)
+    public function clearOrganismType(int $xPos, int $yPos, int $speciesId)
     {
-        if (isset($this->organisms[$x], $this->organisms[$x][$y]) && $this->organisms[$x][$y] == $organism) {
-            unset($this->organisms[$x][$y]);
+        if (isset($this->organisms[$xPos], $this->organisms[$xPos][$yPos]) && $this->organisms[$xPos][$yPos] == $speciesId) {
+            unset($this->organisms[$xPos][$yPos]);
         }
     }
 
@@ -266,31 +287,31 @@ class LifeBoard implements Exportable
     }
 
     /**
-     * @param int $oneOrganism
-     * @param int $anotherOrganism
+     * @param int $originalOrganism
+     * @param int $newOrganism
      * @return int the ID of the surviving organism
      */
-    private function findSurvivor(int $oneOrganism, int $anotherOrganism): int
+    private function findSurvivor(int $originalOrganism, int $newOrganism): int
     {
         // @todo perhaps mt_rand() is overkill, but rand() doesn't quite guarantee a fair coin toss
-        return (mt_rand(0, 1) > 0) ? $oneOrganism : $anotherOrganism;
+        return (mt_rand(0, 1) > 0) ? $originalOrganism : $newOrganism;
     }
 
     /**
-     * @param int $x
-     * @param int $y
-     * @param string $organism
+     * @param int $xPos
+     * @param int $yPos
+     * @param string $speciesName
      * @return int
      * @throws BoardStateException
      */
-    public function importOrganism(int $x, int $y, string $organism = 'o'): int
+    public function importOrganism(int $xPos, int $yPos, string $speciesName = 'o'): int
     {
         if ($this->isInitialized()) {
-            if ($x >= $this->getEdgeSize() || $y >= $this->getEdgeSize() || $x < 0 || $y < 0) {
+            if ($xPos >= $this->getEdgeSize() || $yPos >= $this->getEdgeSize() || $xPos < 0 || $yPos < 0) {
                 throw new \InvalidArgumentException('Cell outside board!');
             }
-            $organismNumber = $this->getNumberByOrganismName($organism);
-            return $this->setOrganism($x, $y, $organismNumber);
+            $organismNumber = $this->getIdBySpeciesName($speciesName);
+            return $this->setOrganism($xPos, $yPos, $organismNumber);
         } else {
             throw new BoardStateException('Board not configured yet!');
         }
@@ -306,21 +327,21 @@ class LifeBoard implements Exportable
 
     /**
      * Map the string name of an organism into an internal representation
-     * @param string $organism
+     * @param string $speciesName
      * @return int
      * @throws TooManySpeciesException
      */
-    public function getNumberByOrganismName(string $organism): int
+    public function getIdBySpeciesName(string $speciesName): int
     {
-        if (!isset($this->organismNameMap[$organism])) {
-            $nextCount = count($this->organismNameMap) + 1;
+        if (!isset($this->speciesNameMap[$speciesName])) {
+            $nextCount = count($this->speciesNameMap) + 1;
             if ($nextCount <= $this->speciesCount) {
-                $this->organismNameMap[$organism] = $nextCount;
+                $this->speciesNameMap[$speciesName] = $nextCount;
             } else {
                 throw new TooManySpeciesException('Attempted to add too many species');
             }
         }
-        return $this->organismNameMap[$organism];
+        return $this->speciesNameMap[$speciesName];
     }
 
     /**
@@ -328,37 +349,39 @@ class LifeBoard implements Exportable
      * @param int $organismNumber
      * @return string
      */
-    public function getOrganismNameByNumber(int $organismNumber): string
+    public function getSpeciesNameById(int $organismNumber): string
     {
-        if (is_null($this->organismNumberMap)) {
-            $this->organismNumberMap = array_flip($this->organismNameMap);
+        if (is_null($this->speciesNumberMap)) {
+            $this->speciesNumberMap = array_flip($this->speciesNameMap);
         }
-        if (!isset($this->organismNumberMap[$organismNumber])) {
+        if (!isset($this->speciesNumberMap[$organismNumber])) {
+            // none
             return '.';
         }
-        return $this->organismNumberMap[$organismNumber];
+        return $this->speciesNumberMap[$organismNumber];
     }
 
     /**
-     * Returns a new LB with the state of the next generation.
+     * Returns a new LifeBoard with the state of the next generation.
      * NOTE that we are NOT changing state of $this, we are making a new instance for the new state.
-     * (Except in the degenerate case of still lives, where we don't compute anything, just bump the gen up)
-     * @return LifeBoard|null
+     * (Except in the degenerate case of still lives, where we don't compute anything, just bump the generation counter up)
+     * @return LifeBoard
      */
-    public function nextGeneration()
+    public function getNextBoard(): LifeBoard
     {
         if ($this->getMaxIterations() <= $this->generation) {
-            return null;
+            $this->finished = true;
+            return $this;
         }
         if ($this->isStillLife()) { // nothing more to do here
             $this->generation++;
             return $this;
         } else {
-            $newBoard = new LifeBoard($this->organismNameMap, $this->generation + 1);
+            $newBoard = new LifeBoard($this->speciesNameMap, $this->generation + 1);
             $newBoard->setSpeciesCount($this->getSpeciesCount())
                 ->setEdgeSize($this->getEdgeSize())
                 ->setMaxIterations($this->getMaxIterations());
-            $newBoard->calculateChildren($this);
+            $newBoard->calculateNewGeneration($this);
             if ($newBoard->equals($this)) {
                 $newBoard->setStillLife(true);
             }
@@ -371,7 +394,7 @@ class LifeBoard implements Exportable
      * Possible optimizations: check for still life, check for loops, ignore empty areas, ignore already processed cells and only check once per point. Or go for HashLife, currently most efficient.
      * @param LifeBoard $oldBoard
      */
-    private function calculateChildren(LifeBoard $oldBoard)
+    private function calculateNewGeneration(LifeBoard $oldBoard)
     {
         for ($species = $this->getSpeciesCount(); $species > 0; $species--) {
             for ($x = $this->edgeSize - 1; $x >= 0; $x--) {
@@ -434,7 +457,7 @@ class LifeBoard implements Exportable
         $string = '';
         for ($y = $this->edgeSize - 1; $y >= 0; $y--) {
             for ($x = $this->edgeSize - 1; $x >= 0; $x--) {
-                $string .= $this->getOrganismNameByNumber($this->getOrganism($x, $y));
+                $string .= $this->getSpeciesNameById($this->getOrganism($x, $y));
             }
             $string .= "\n";
         }

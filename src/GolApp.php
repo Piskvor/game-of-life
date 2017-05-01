@@ -60,7 +60,7 @@ class GolApp
     public function run()
     {
         if ($this->parseFile()) {
-            while ($newBoard = $this->board->nextGeneration()) {
+            while ($newBoard = $this->board->getNextBoard()) {
 
                 $this->log->info('Generation: ' . $this->board->getGeneration() . "\n");
                 if ($this->isDebug) { // might be expensive
@@ -70,7 +70,7 @@ class GolApp
             }
 
             if ($this->board->export($this->outFile)) {
-                $this->log->info('Exported to ' . $this->outfile . "\n");
+                $this->log->info('Exported to ' . $this->outFile . "\n");
             } else {
                 throw new \ErrorException('Unable to export file');
             }
@@ -105,10 +105,10 @@ class GolApp
             '/life/organisms/organism',
             function (Parser $parser, \SimpleXMLElement $organismNode) use (&$organismCount) {
                 // @fixme: invalid x_pos and y_pos will become 0. Caveat: parsing speed?
-                $x = (int)$organismNode->x_pos;
-                $y = (int)$organismNode->y_pos;
-                $organism = (string)$organismNode->species;
-                $this->board->importOrganism($x, $y, $organism);
+                $xPos = (int)$organismNode->x_pos;
+                $yPos = (int)$organismNode->y_pos;
+                $speciesName = (string)$organismNode->species;
+                $this->board->importOrganism($xPos, $yPos, $speciesName);
                 $organismCount++;
             }
         );
