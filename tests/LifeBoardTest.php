@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace Piskvor\Test;
 
+use Piskvor\Exception\TooManySpeciesException;
+use Piskvor\Exception\BoardStateException;
+
 use PHPUnit\Framework\TestCase;
-use Piskvor\BoardStateException;
 use Piskvor\LifeBoard;
 use Piskvor\Log;
-use Piskvor\TooManySpeciesException;
 use Psr\Log\LogLevel;
 
 class LifeBoardTest extends TestCase
@@ -176,7 +177,7 @@ class LifeBoardTest extends TestCase
     {
         // no neighbors, die
         $this->lb->importOrganism(5, 5);
-        $lbNext = $this->lb->nextGeneration();
+        $lbNext = $this->lb->getNextBoard();
         $this->assertCount(0, $lbNext->getAllOrganisms());
     }
 
@@ -187,12 +188,12 @@ class LifeBoardTest extends TestCase
     {
         $this->lb->importOrganism(5, 5);
         $this->lb->importOrganism(5, 6);
-        $lbNext2 = $this->lb->nextGeneration();
+        $lbNext2 = $this->lb->getNextBoard();
         $this->assertCount(0, $lbNext2->getAllOrganisms());
 
         // two neighbors, keep (and oscillate)
         $this->lb->importOrganism(5, 7);
-        $lbNext3 = $this->lb->nextGeneration();
+        $lbNext3 = $this->lb->getNextBoard();
         $this->assertCount(3, $lbNext3->getAllOrganisms());
 
     }
@@ -209,7 +210,7 @@ class LifeBoardTest extends TestCase
 
             $this->lb->importOrganism(5, $y);
         }
-        $lbNext3 = $this->lb->nextGeneration();
+        $lbNext3 = $this->lb->getNextBoard();
         $this->assertCount(3, $lbNext3->getAllOrganisms());
 
     }
@@ -228,7 +229,7 @@ class LifeBoardTest extends TestCase
         $this->lb->importOrganism(5, 5);
         $this->lb->importOrganism(5, 6);
         $this->lb->importOrganism(6, 5);
-        $lbNext3 = $this->lb->nextGeneration();
+        $lbNext3 = $this->lb->getNextBoard();
         $this->assertCount(4, $lbNext3->getAllOrganisms());
     }
 
@@ -245,7 +246,7 @@ class LifeBoardTest extends TestCase
         }
         $this->lb->importOrganism(5, 6);
         $this->log->debug($this->lb);
-        $lbNext = $this->lb->nextGeneration();
+        $lbNext = $this->lb->getNextBoard();
         $this->log->debug($lbNext);
         $this->assertFalse($lbNext->isLive(5, 5));
     }
@@ -263,7 +264,7 @@ class LifeBoardTest extends TestCase
         }
         $this->lb->importOrganism(5, 6);
         $this->lb->importOrganism(5, 4);
-        $lbNext = $this->lb->nextGeneration();
+        $lbNext = $this->lb->getNextBoard();
         $this->assertFalse($lbNext->isLive(5, 5));
     }
 
@@ -281,7 +282,7 @@ class LifeBoardTest extends TestCase
         $this->lb->importOrganism(5, 6);
         $this->lb->importOrganism(5, 4);
         $this->lb->importOrganism(6, 4);
-        $lbNext = $this->lb->nextGeneration();
+        $lbNext = $this->lb->getNextBoard();
         $this->assertFalse($lbNext->isLive(5, 5));
     }
 
@@ -300,7 +301,7 @@ class LifeBoardTest extends TestCase
         $this->lb->importOrganism(5, 4);
         $this->lb->importOrganism(6, 4);
         $this->lb->importOrganism(6, 5);
-        $lbNext = $this->lb->nextGeneration();
+        $lbNext = $this->lb->getNextBoard();
         $this->assertFalse($lbNext->isLive(5, 5));
     }
 
@@ -320,7 +321,7 @@ class LifeBoardTest extends TestCase
         for ($y = 4; $y <= 6; $y++) {
             $this->lb->importOrganism(6, $y);
         }
-        $lbNext = $this->lb->nextGeneration();
+        $lbNext = $this->lb->getNextBoard();
         $this->assertFalse($lbNext->isLive(5, 5));
     }
 
@@ -380,7 +381,7 @@ class LifeBoardTest extends TestCase
         }
         $result = 0;
         for ($t = $tries; $t >= 0; $t--) {
-            $lbNext = $this->lb->nextGeneration();
+            $lbNext = $this->lb->getNextBoard();
             $organism = $lbNext->getOrganism(5, 5);
             $this->assertTrue($organism > 0, 'Organism is dead!');
             if ($organism % 2 == 0) {
@@ -389,6 +390,7 @@ class LifeBoardTest extends TestCase
         }
         $result = $result / $tries;
         // if the selection is random, we should be close to $expectedResult here
+        $this->log->debug($result);
         $this->assertTrue($result > $expectedResultLow && $result < $expectedResultHigh, $result);
     }
 }

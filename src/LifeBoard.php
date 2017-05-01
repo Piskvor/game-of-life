@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Piskvor;
 
+use Piskvor\Exception\BoardStateException;
+use Piskvor\Exception\TooManySpeciesException;
 use Piskvor\Export\Exportable;
 use Piskvor\Export\XmlExporter;
 

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Piskvor;
+namespace Piskvor\Exception;
 
 
 class BoardStateException extends \Exception

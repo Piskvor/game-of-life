@@ -1,6 +1,6 @@
 <?php
 
-namespace Piskvor;
+namespace Piskvor\Exception;
 
 
 class TooManySpeciesException extends \Exception
