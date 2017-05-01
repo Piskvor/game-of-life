@@ -60,8 +60,8 @@ class GolApp
     public function run()
     {
         if ($this->parseFile()) {
-            while ($newBoard = $this->board->getNextBoard()) {
-
+            while (!$this->board->isFinished()) {
+                $newBoard = $this->board->getNextBoard();
                 $this->log->info('Generation: ' . $this->board->getGeneration() . "\n");
                 if ($this->isDebug) { // might be expensive
                     $this->log->debug($this->board);
@@ -78,6 +78,7 @@ class GolApp
             throw new \ErrorException('Unable to import file');
         }
     }
+
 
     /**
      * Go through the XML file and import it into the board
