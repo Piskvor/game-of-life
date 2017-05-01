@@ -119,7 +119,7 @@ class LifeBoardTest extends TestCase
      * we would hit many limits before that;
      * so stick with the lower bound of insanity.
      */
-    public function testImportBadWorld1()
+    public function testImportBadWorldSize()
     {
         $lb = new LifeBoard();
         $this->expectException(\InvalidArgumentException::class);
@@ -173,7 +173,7 @@ class LifeBoardTest extends TestCase
     /**
      * Test for 0 neighbors - the cell MUST die of boredom
      */
-    public function testNextGeneration0()
+    public function testNextGenerationFrom0Neighbors()
     {
         // no neighbors, die
         $this->lb->importOrganism(5, 5);
@@ -184,7 +184,7 @@ class LifeBoardTest extends TestCase
     /**
      * Test for 1 neighbor - the cell MUST die of boredom
      */
-    public function testNextGeneration1()
+    public function testNextGenerationFrom1Neighbor()
     {
         $this->lb->importOrganism(5, 5);
         $this->lb->importOrganism(5, 6);
@@ -204,7 +204,7 @@ class LifeBoardTest extends TestCase
      * but that's a detail of the cell configuration
      * that's not relevant here)
      */
-    public function testNextGeneration2()
+    public function testNextGenerationFrom2Neighbors()
     {
         for ($y = 5; $y <= 7; $y++) {
 
@@ -223,7 +223,7 @@ class LifeBoardTest extends TestCase
      * Incidentally, this SHOULD put the board into the stillLife mode in next iteration,
      * but that's an implementation detail not
      */
-    public function testNextGeneration3()
+    public function testNextGenerationFrom3Neighbors()
     {
         // three neighbors, make fourth
         $this->lb->importOrganism(5, 5);
@@ -237,7 +237,7 @@ class LifeBoardTest extends TestCase
      * Test for 4 neighbors - the surrounded cell MUST die
      */
     public
-    function testNextGeneration4()
+    function testNextGenerationFrom4Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->importOrganism(5, 5);
@@ -255,7 +255,7 @@ class LifeBoardTest extends TestCase
      * Test for 5 neighbors - the surrounded cell MUST die
      */
     public
-    function testNextGeneration5()
+    function testNextGenerationFrom5Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->importOrganism(5, 5);
@@ -272,7 +272,7 @@ class LifeBoardTest extends TestCase
      * Test for 6 neighbors - the surrounded cell MUST die
      */
     public
-    function testNextGeneration6()
+    function testNextGenerationFrom6Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->importOrganism(5, 5);
@@ -290,7 +290,7 @@ class LifeBoardTest extends TestCase
      * Test for 7 neighbors - the surrounded cell MUST die
      */
     public
-    function testNextGeneration7()
+    function testNextGenerationFrom7Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->importOrganism(5, 5);
@@ -309,7 +309,7 @@ class LifeBoardTest extends TestCase
      * Test for 8 neighbors - the surrounded cell MUST die
      */
     public
-    function testNextGeneration8()
+    function testNextGenerationFrom8Neighbors()
     {
         // here we check for liveness of [5,5] specifically - previous tests were checking for known and expected total counts
         $this->lb->importOrganism(5, 5);
